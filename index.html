@@ -590,7 +590,7 @@ function genCode(){const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i
 /* URL веб-застосунку Google Apps Script (закінчується на /exec).
    Порожній рядок — дані нікуди не надсилаються, лишається лише CSV. */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxL-PDMPAZZzH8uVMhVGjRQlZIs3n8DuUdUkxi6p_ZZDdsEMkaIOOi_UyXIpXTk5t73/exec";
-const APP_VERSION = "2026-09-28";
+const APP_VERSION = "2026-10-01";
 const TRIAL_TIMEOUT_MS = 35000;      /* бездіяльність на пробі → проба фіксується як пропущена */
 const MEM_TIMEOUT_MS   = 70000;      /* «Запам'ятай»: довше, бо дитина обирає кілька картинок */
 
@@ -613,9 +613,18 @@ function trialStart(onTimeout,ms){clearTimeout(_trialTimer);_trialDone=false;_tr
 function trialAnswer(){if(_trialDone)return false;_trialDone=true;clearTimeout(_trialTimer);return true;}
 function trialStop(){_trialDone=true;clearTimeout(_trialTimer);}
 
+/* ===== Облік відсіву: короткі «відмітки прогресу» в таблицю (без імені та дати народження) =====
+   Етапи: consent → info → childHi (анкета) → blockMemory … blockSee → helpScreen (ігри завершено) → complete */
+const SRC=(()=>{try{return (new URLSearchParams(location.search).get("src")||"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,30);}catch(e){return "";}})();
+function ping(stage){ if(!DATA_ENDPOINT) return; try{
+  const p={type:"progress",session:S.id,stage,ts:new Date().toISOString(),lang:S.lang||lang,form:S.form||"",
+    age_m:(()=>{try{const a=ageMonths();return a==null?"":a;}catch(e){return "";}})(),age_mode:S.ageMode||"",dev_class:deviceInfo().dev_class,src:SRC,resumed:S.resumed||0,app_version:APP_VERSION};
+  fetch(DATA_ENDPOINT,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(p)}).catch(()=>{});
+}catch(e){} }
+
 /* ===== Автозбереження: знімок стану після кожного блоку ===== */
 const SNAP_KEY="kg_snapshot";
-function snapSave(stage){try{S._stage=stage;localStorage.setItem(SNAP_KEY,JSON.stringify({ts:Date.now(),lang,S}));}catch(e){}}
+function snapSave(stage){ping(stage);try{S._stage=stage;localStorage.setItem(SNAP_KEY,JSON.stringify({ts:Date.now(),lang,S}));}catch(e){}}
 function snapClear(){try{localStorage.removeItem(SNAP_KEY);}catch(e){}}
 function snapLoad(){try{const o=JSON.parse(localStorage.getItem(SNAP_KEY)||"null");if(o&&o.S&&o.S._stage&&Date.now()-o.ts<24*3600*1000)return o;}catch(e){}return null;}
 
@@ -754,7 +763,7 @@ function consentDetail(){
    <div style="text-align:center;margin-top:14px"><button class="ghost-light" onclick="consentScreen()">${t("cBack")}</button></div>
   </div></div>`;
 }
-window.consentDone=()=>{S.consent={agreed:true,ts:Date.now()};childInfo();};
+window.consentDone=()=>{S.consent={agreed:true,ts:Date.now()};ping("consent");childInfo();};
 
 function parentGate(){app.innerHTML=`<div class="screen"><div class="form"><h2 style="text-align:center">👋</h2><p>${t("parentGate")}</p><div style="text-align:center"><button class="btn" onclick="childInfo()">${t("ready")}</button></div></div></div>`;setProg(.08);}
 function childHi(){snapSave("childHi");app.innerHTML=`<div class="screen"><div class="hero">${owl()}</div><h2>${t("childHi")}</h2><button class="btn" onclick="blockCorsi()">${t("start")} ▶</button></div>`;say(t("childHi"));setProg(.1);}
@@ -829,6 +838,7 @@ window.childInfoDone=()=>{
   S.retestOf=(S.parent.retest_declared==="так"&&rc)?(/^KG-/.test(rc)?rc:"KG-"+rc.replace(/^KG/,"")):"";
   /* Форма: А — перше проходження; Б — повторне (за кодом, за відповіддю батьків або за історією на цьому пристрої) */
   S.form=(S.retestOf||S.parent.retest_declared==="так"||isRetest())?"B":"A";
+  ping("info");
   parentForm();
 };
 
@@ -2101,11 +2111,11 @@ function finishAll(){setProg(1);S.finished=Date.now();const sc=scoreChild();S.sc
    <p class="big" style="font-size:13px;opacity:.85;margin-top:14px">${shareMsg}</p>
    <p class="big" style="font-size:13px;opacity:.7;margin-top:8px">${t("finalNote")}</p>
    ${DATA_ENDPOINT?`<p id="sendst" class="big" style="font-size:13px;margin-top:8px"></p>`:""}</div>`;
- snapClear(); sendData();
+ snapClear(); sendData(); ping("complete");
 }
 /* Плоский запис сесії. withPII=false — без імені, дати народження та email (для надсилання дослідниці) */
 function buildFlat(withPII){const P=S.parent||{},sc=S.scores,pr=buildProfile();
- const flat={session:S.id,app_version:APP_VERSION,lang:S.lang,form:S.form||"A",retest_of:S.retestOf||"",run_no:S.runNo||"",
+ const flat={session:S.id,app_version:APP_VERSION,src:SRC,lang:S.lang,form:S.form||"A",retest_of:S.retestOf||"",run_no:S.runNo||"",
   ts_started:new Date(S.started).toISOString(),ts_finished:new Date(S.finished).toISOString(),resumed_n:S.resumed||0,
   child_age_months:pr.ageMonths??"",child_age_mode:S.ageMode||"",
   child_corsi_span:sc.corsi_span,child_dccs_correct:sc.dccs_correct,child_dccs_total:sc.dccs_total,child_attention_hits:sc.attention_hits,child_attention_total:sc.attention_total,child_attention_false:sc.attention_false,child_attention_time_s:sc.attention_time_s,child_memory_score:sc.memory_score,child_memory_hits:sc.memory_hits,child_memory_fa:sc.memory_fa,
