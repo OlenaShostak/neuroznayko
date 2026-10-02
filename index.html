@@ -714,18 +714,20 @@ document.addEventListener("pointerdown",function _unlockVoice(){document.removeE
   try{_vAudio=_vAudio||new Audio();_vAudio.src=_silentWav();const p=_vAudio.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}},{passive:true});
 function _playFile(url,tok){return new Promise((res,rej)=>{try{_vAudio=_vAudio||new Audio();const a=_vAudio;
   a.onended=()=>res();a.onerror=()=>rej(new Error("nofile"));a.src=url;const p=a.play();if(p&&p.catch)p.catch(rej);}catch(e){rej(e);}});}
-function sayParts(parts){parts=(parts||[]).map(x=>String(x||"").trim()).filter(Boolean);if(!parts.length)return;lastSpeech=parts;
+/* Повертає Promise, що виконується, коли фраза (усі її частини) договорена або перервана */
+function sayParts(parts){parts=(parts||[]).map(x=>String(x||"").trim()).filter(Boolean);if(!parts.length)return Promise.resolve();lastSpeech=parts;
   const tok=++_vTok;try{speechSynthesis.cancel();}catch(e){}try{if(_vAudio)_vAudio.pause();}catch(e){}
-  let i=0;const next=()=>{if(tok!==_vTok||i>=parts.length)return;const part=parts[i++];
-    _playFile(VOICE_DIR+lang+"/"+voiceKey(part)+".mp3",tok).then(next).catch(()=>{if(tok!==_vTok)return;_ttsSay(parts.slice(i-1).join(" "));});};
-  next();}
-function say(x){sayParts([x]);}
-function _ttsSay(x){if(!('speechSynthesis'in window))return;
+  return new Promise(done=>{let i=0;const next=()=>{if(tok!==_vTok||i>=parts.length)return done();const part=parts[i++];
+    _playFile(VOICE_DIR+lang+"/"+voiceKey(part)+".mp3",tok).then(next).catch(()=>{if(tok!==_vTok)return done();_ttsSay(parts.slice(i-1).join(" "),done);});};
+  next();});}
+function say(x){return sayParts([x]);}
+function _ttsSay(x,onEnd){let fin=false;const end=()=>{if(!fin){fin=true;if(onEnd)onEnd();}};
+  if(!('speechSynthesis'in window))return end();
   try{
     speechSynthesis.cancel();
-    const go=()=>{const u=new SpeechSynthesisUtterance(x);const code=(lang==="uk"||lang==="ru"||lang==="pl")?lang:"en";const v=_pickVoice(code);if(v){u.voice=v;u.lang=v.lang;}else{u.lang=LL("uk-UA","ru-RU","en-US","pl-PL");}u.rate=1;u.pitch=1.12;speechSynthesis.speak(u);setTimeout(()=>{try{if(speechSynthesis.paused)speechSynthesis.resume();}catch(e){}},250);};
+    const go=()=>{const u=new SpeechSynthesisUtterance(x);u.onend=end;u.onerror=end;const code=(lang==="uk"||lang==="ru"||lang==="pl")?lang:"en";const v=_pickVoice(code);if(v){u.voice=v;u.lang=v.lang;}else{u.lang=LL("uk-UA","ru-RU","en-US","pl-PL");}u.rate=1;u.pitch=1.12;speechSynthesis.speak(u);setTimeout(()=>{try{if(speechSynthesis.paused)speechSynthesis.resume();}catch(e){}},250);};
     setTimeout(go,60); // невелика затримка після cancel, щоб рушій не «з'їв» фразу
-  }catch(e){}
+  }catch(e){end();}
 }
 document.getElementById("spk").onclick=()=>{if(lastSpeech)sayParts(Array.isArray(lastSpeech)?lastSpeech:[lastSpeech]);};
 function log(b,i,c,rt,ex){S.trials.push({block:b,item:i,correct:c,rt_ms:rt,ts:Date.now(),...(ex||{})});}
@@ -1307,7 +1309,9 @@ function reward(n){_next=n;trialStop();if(n&&n.name)snapSave(n.name);
   const m1=_rwResolve(base[Math.random()*base.length|0]);
   const m2=add.length?_rwResolve(add[Math.random()*add.length|0]):"";
   const m=m2?m1+" "+m2:m1;
-  confetti();app.innerHTML=`<div class="screen"><div class="badge">${trophy()}</div><h2>${m} 🌟</h2><div class="stars">⭐⭐⭐</div><p class="big" style="font-size:14px;margin-top:6px;opacity:.9">${t("advNext")}</p></div>`;sayParts([m1,m2]);setTimeout(()=>{if(_next)_next();},2800);}
+  confetti();app.innerHTML=`<div class="screen"><div class="badge">${trophy()}</div><h2>${m} 🌟</h2><div class="stars">⭐⭐⭐</div><p class="big" style="font-size:14px;margin-top:6px;opacity:.9">${t("advNext")}</p></div>`;const t0=Date.now();const go=()=>{const f=_next;_next=null;if(f)f();};
+  Promise.race([sayParts([m1,m2]),new Promise(r=>setTimeout(r,9000))])
+    .then(()=>setTimeout(go,Math.max(500,2200-(Date.now()-t0))));}
 
 function finishChild(){setProg(.92);confetti();S.child_finished=Date.now();snapSave("helpScreen");const thanks=LL("Дякую, що пограв(-ла) зі мною! Я — Мудра Сова, і наша пригода вдалась.","Спасибо, что играл(-а) со мной! Я — Мудрая Сова, и наше приключение удалось.","Thank you for playing with me! I am the Wise Owl, and our adventure was a success.");app.innerHTML=`<div class="screen"><div class="hero">${trophy()}</div><h1>${t("done")} 🏆</h1><div class="stars">⭐ ⭐ ⭐</div><p class="big" style="font-size:14px;margin-top:6px;opacity:.9">${thanks}</p><p class="big" style="font-size:15px;margin-top:10px">${LL("А тепер поклич дорослого й віддай йому телефон 📱","А теперь позови взрослого и отдай ему телефон 📱","Now call a grown-up and give them the phone 📱")}</p><button class="ghost" style="margin-top:14px" onclick="helpScreen()">↦ ${t("toParent")}</button></div>`;
   const _handoff=LL("А тепер поклич дорослого й віддай йому телефон.","А теперь позови взрослого и отдай ему телефон.","Now call a grown-up and give them the phone.");
