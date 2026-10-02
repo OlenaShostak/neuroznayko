@@ -589,8 +589,8 @@ function genCode(){const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i
 /* ================= НАЛАШТУВАННЯ ДОСЛІДЖЕННЯ ================= */
 /* URL веб-застосунку Google Apps Script (закінчується на /exec).
    Порожній рядок — дані нікуди не надсилаються, лишається лише CSV. */
-const DATA_ENDPOINT = "";
-const APP_VERSION = "2026-09-28";
+const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxL-PDMPAZZzH8uVMhVGjRQlZIs3n8DuUdUkxi6p_ZZDdsEMkaIOOi_UyXIpXTk5t73/exec";
+const APP_VERSION = "2026-10-01";
 const TRIAL_TIMEOUT_MS = 35000;      /* бездіяльність на пробі → проба фіксується як пропущена */
 const MEM_TIMEOUT_MS   = 70000;      /* «Запам'ятай»: довше, бо дитина обирає кілька картинок */
 
@@ -613,9 +613,18 @@ function trialStart(onTimeout,ms){clearTimeout(_trialTimer);_trialDone=false;_tr
 function trialAnswer(){if(_trialDone)return false;_trialDone=true;clearTimeout(_trialTimer);return true;}
 function trialStop(){_trialDone=true;clearTimeout(_trialTimer);}
 
+/* ===== Облік відсіву: короткі «відмітки прогресу» в таблицю (без імені та дати народження) =====
+   Етапи: consent → info → childHi (анкета) → blockMemory … blockSee → helpScreen (ігри завершено) → complete */
+const SRC=(()=>{try{return (new URLSearchParams(location.search).get("src")||"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,30);}catch(e){return "";}})();
+function ping(stage){ if(!DATA_ENDPOINT) return; try{
+  const p={type:"progress",session:S.id,stage,ts:new Date().toISOString(),lang:S.lang||lang,form:S.form||"",
+    age_m:(()=>{try{const a=ageMonths();return a==null?"":a;}catch(e){return "";}})(),age_mode:S.ageMode||"",dev_class:deviceInfo().dev_class,src:SRC,resumed:S.resumed||0,app_version:APP_VERSION};
+  fetch(DATA_ENDPOINT,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(p)}).catch(()=>{});
+}catch(e){} }
+
 /* ===== Автозбереження: знімок стану після кожного блоку ===== */
 const SNAP_KEY="kg_snapshot";
-function snapSave(stage){try{S._stage=stage;localStorage.setItem(SNAP_KEY,JSON.stringify({ts:Date.now(),lang,S}));}catch(e){}}
+function snapSave(stage){ping(stage);try{S._stage=stage;localStorage.setItem(SNAP_KEY,JSON.stringify({ts:Date.now(),lang,S}));}catch(e){}}
 function snapClear(){try{localStorage.removeItem(SNAP_KEY);}catch(e){}}
 function snapLoad(){try{const o=JSON.parse(localStorage.getItem(SNAP_KEY)||"null");if(o&&o.S&&o.S._stage&&Date.now()-o.ts<24*3600*1000)return o;}catch(e){}return null;}
 
@@ -682,7 +691,6 @@ const VOICE_PREF={
 function _pickVoice(code){ if(!_voices.length)_loadVoices();
   const want=[code];
   let c=_voices.filter(v=>want.some(w=>(v.lang||"").toLowerCase().startsWith(w)));
-  if(!c.length&&code==="uk")c=_voices.filter(v=>(v.lang||"").toLowerCase().startsWith("ru")); // fallback: ru voice for uk
   if(!c.length)return null;
   const pref=VOICE_PREF[code]||[];
   const score=v=>{const n=(v.name||"").toLowerCase();let s=0;
@@ -691,14 +699,37 @@ function _pickVoice(code){ if(!_voices.length)_loadVoices();
     return s;};
   return c.slice().sort((a,b)=>score(b)-score(a))[0];
 }
-function say(x){lastSpeech=x;if(!('speechSynthesis'in window))return;
+/* ===== ОЗВУЧКА: спершу готові MP3 (Azure), якщо файлу немає — системний голос =====
+   Файли лежать поруч із index.html: audio/app/<мова>/<ключ>.mp3, ключ = хеш тексту фрази.
+   Перелік фраз — у voice_manifest.json; MP3 створює скрипт azure_tts.py. */
+const VOICE_DIR = "audio/app/";
+function voiceKey(s){s=String(s).replace(/\s+/g," ").trim();let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0).toString(16).padStart(8,"0");}
+let _vAudio=null,_vTok=0;
+function _silentWav(){const n=800,b=new ArrayBuffer(44+n),v=new DataView(b);const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
+  w(0,"RIFF");v.setUint32(4,36+n,true);w(8,"WAVE");w(12,"fmt ");v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,8000,true);v.setUint32(28,8000,true);v.setUint16(32,1,true);v.setUint16(34,8,true);w(36,"data");v.setUint32(40,n,true);
+  for(let i=0;i<n;i++)v.setUint8(44+i,128);let s="";new Uint8Array(b).forEach(x=>s+=String.fromCharCode(x));return "data:audio/wav;base64,"+btoa(s);}
+/* Розблокування звуку на мобільних: перше торкання програє тишу тим самим аудіоелементом */
+document.addEventListener("pointerdown",function _unlockVoice(){document.removeEventListener("pointerdown",_unlockVoice);
+  try{_vAudio=_vAudio||new Audio();_vAudio.src=_silentWav();const p=_vAudio.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}},{passive:true});
+function _playFile(url,tok){return new Promise((res,rej)=>{try{_vAudio=_vAudio||new Audio();const a=_vAudio;
+  a.onended=()=>res();a.onerror=()=>rej(new Error("nofile"));a.src=url;const p=a.play();if(p&&p.catch)p.catch(rej);}catch(e){rej(e);}});}
+/* Повертає Promise, що виконується, коли фраза (усі її частини) договорена або перервана */
+function sayParts(parts){parts=(parts||[]).map(x=>String(x||"").trim()).filter(Boolean);if(!parts.length)return Promise.resolve();lastSpeech=parts;
+  const tok=++_vTok;try{speechSynthesis.cancel();}catch(e){}try{if(_vAudio)_vAudio.pause();}catch(e){}
+  return new Promise(done=>{let i=0;const next=()=>{if(tok!==_vTok||i>=parts.length)return done();const part=parts[i++];
+    _playFile(VOICE_DIR+lang+"/"+voiceKey(part)+".mp3",tok).then(next).catch(()=>{if(tok!==_vTok)return done();_ttsSay(parts.slice(i-1).join(" "),done);});};
+  next();});}
+function say(x){return sayParts([x]);}
+function _ttsSay(x,onEnd){let fin=false;const end=()=>{if(!fin){fin=true;if(onEnd)onEnd();}};
+  if(!('speechSynthesis'in window))return end();
   try{
     speechSynthesis.cancel();
-    const go=()=>{const u=new SpeechSynthesisUtterance(x);const code=(lang==="uk"||lang==="ru"||lang==="pl")?lang:"en";const v=_pickVoice(code);if(v){u.voice=v;u.lang=v.lang;}else{u.lang=LL("uk-UA","ru-RU","en-US","pl-PL");}u.rate=1;u.pitch=1.12;speechSynthesis.speak(u);setTimeout(()=>{try{if(speechSynthesis.paused)speechSynthesis.resume();}catch(e){}},250);};
+    const go=()=>{const u=new SpeechSynthesisUtterance(x);u.onend=end;u.onerror=end;const code=(lang==="uk"||lang==="ru"||lang==="pl")?lang:"en";const v=_pickVoice(code);if(v){u.voice=v;u.lang=v.lang;}else{u.lang=LL("uk-UA","ru-RU","en-US","pl-PL");}u.rate=1;u.pitch=1.12;speechSynthesis.speak(u);setTimeout(()=>{try{if(speechSynthesis.paused)speechSynthesis.resume();}catch(e){}},250);};
     setTimeout(go,60); // невелика затримка після cancel, щоб рушій не «з'їв» фразу
-  }catch(e){}
+  }catch(e){end();}
 }
-document.getElementById("spk").onclick=()=>{if(lastSpeech)say(lastSpeech);};
+document.getElementById("spk").onclick=()=>{if(lastSpeech)sayParts(Array.isArray(lastSpeech)?lastSpeech:[lastSpeech]);};
 function log(b,i,c,rt,ex){S.trials.push({block:b,item:i,correct:c,rt_ms:rt,ts:Date.now(),...(ex||{})});}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
 function sample(a,n,ex=[]){return shuffle(a.filter(x=>!ex.includes(x))).slice(0,n);}
@@ -734,7 +765,7 @@ function consentDetail(){
    <div style="text-align:center;margin-top:14px"><button class="ghost-light" onclick="consentScreen()">${t("cBack")}</button></div>
   </div></div>`;
 }
-window.consentDone=()=>{S.consent={agreed:true,ts:Date.now()};childInfo();};
+window.consentDone=()=>{S.consent={agreed:true,ts:Date.now()};ping("consent");childInfo();};
 
 function parentGate(){app.innerHTML=`<div class="screen"><div class="form"><h2 style="text-align:center">👋</h2><p>${t("parentGate")}</p><div style="text-align:center"><button class="btn" onclick="childInfo()">${t("ready")}</button></div></div></div>`;setProg(.08);}
 function childHi(){snapSave("childHi");app.innerHTML=`<div class="screen"><div class="hero">${owl()}</div><h2>${t("childHi")}</h2><button class="btn" onclick="blockCorsi()">${t("start")} ▶</button></div>`;say(t("childHi"));setProg(.1);}
@@ -809,6 +840,7 @@ window.childInfoDone=()=>{
   S.retestOf=(S.parent.retest_declared==="так"&&rc)?(/^KG-/.test(rc)?rc:"KG-"+rc.replace(/^KG/,"")):"";
   /* Форма: А — перше проходження; Б — повторне (за кодом, за відповіддю батьків або за історією на цьому пристрої) */
   S.form=(S.retestOf||S.parent.retest_declared==="так"||isRetest())?"B":"A";
+  ping("info");
   parentForm();
 };
 
@@ -949,7 +981,7 @@ function dccsPhase(rule,i,boxes,done){
     <div style="margin:4px auto 24px">${dccsCard(card.shape,card.color,144)}</div>
     <hr class="taskdiv"><p class="big" style="margin:0 0 10px;font-weight:700">${pickH}</p>
     <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:2px" id="boxes"></div></div>`;
-  say(bigQ+" "+pick);
+  sayParts([bigQ,pick]);
   const bx=document.getElementById("boxes");
   _shuffle(boxes).forEach((b)=>{const d=document.createElement("div");d.style.cssText="background:var(--paper);border-radius:16px;padding:10px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.2)";
     d.innerHTML=dccsCard(b.shape,b.color,70);
@@ -971,9 +1003,9 @@ function dccsBorder(i,boxes,done){
     : (LL("Якщо рамки немає — знайди фігуру такої самої ФОРМИ","Если рамки нет — найди фигуру такой же ФОРМЫ","If there is no frame, find the shape of the same FORM"));
   app.innerHTML=`<div class="screen"><h2>${LL("Гра «Рамка»","Игра «Рамка»","Game \"Frame\"")}</h2>
     <div style="margin:4px auto 24px;display:inline-block;${hasBorder?'border:7px solid #6b8f4e;border-radius:16px;padding:8px':'padding:8px'}">${dccsCard(card.shape,card.color,132)}</div>
-    <p class="big" style="margin:0 0 10px;font-weight:700">${pick.replace(/(КОЛЬОРУ|ЦВЕТА|COLOUR|ФОРМИ|ФОРМЫ|FORM)/,'<span class="kw">$1</span>')}</p>
+    <p class="big" style="margin:0 0 10px;font-weight:700">${pick.replace(/(КОЛЬОРУ|ЦВЕТА|COLOUR|ФОРМИ|ФОРМЫ|FORM|KOLORU|KSZTAŁTU)/,'<span class="kw">$1</span>')}</p>
     <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:2px" id="boxes"></div></div>`;
-  say(pick.replace(/(КОЛЬОРУ|ЦВЕТА|COLOUR|ФОРМИ|ФОРМЫ|FORM)/,m=>m.toLowerCase()));
+  say(pick.replace(/(КОЛЬОРУ|ЦВЕТА|COLOUR|ФОРМИ|ФОРМЫ|FORM|KOLORU|KSZTAŁTU)/,m=>m.toLowerCase()));
   const bx=document.getElementById("boxes");
   _shuffle(boxes).forEach((b)=>{const d=document.createElement("div");d.style.cssText="background:var(--paper);border-radius:16px;padding:10px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.2)";
     d.innerHTML=dccsCard(b.shape,b.color,70);
@@ -1274,14 +1306,17 @@ let _next=null;
 function _rwResolve(item){const _sx=(S.parent&&(S.parent.p_sex||S.parent.sex));return (typeof item==="object")?(_sx==="ж"?item.f:item.m):item;}
 function reward(n){_next=n;trialStop();if(n&&n.name)snapSave(n.name);
   const base=t("reward"), add=t("rewardAdd")||[];
-  let m=_rwResolve(base[Math.random()*base.length|0]);
-  if(add.length){ m+=" "+_rwResolve(add[Math.random()*add.length|0]); }
-  confetti();app.innerHTML=`<div class="screen"><div class="badge">${trophy()}</div><h2>${m} 🌟</h2><div class="stars">⭐⭐⭐</div><p class="big" style="font-size:14px;margin-top:6px;opacity:.9">${t("advNext")}</p></div>`;say(m);setTimeout(()=>{if(_next)_next();},2800);}
+  const m1=_rwResolve(base[Math.random()*base.length|0]);
+  const m2=add.length?_rwResolve(add[Math.random()*add.length|0]):"";
+  const m=m2?m1+" "+m2:m1;
+  confetti();app.innerHTML=`<div class="screen"><div class="badge">${trophy()}</div><h2>${m} 🌟</h2><div class="stars">⭐⭐⭐</div><p class="big" style="font-size:14px;margin-top:6px;opacity:.9">${t("advNext")}</p></div>`;const t0=Date.now();const go=()=>{const f=_next;_next=null;if(f)f();};
+  Promise.race([sayParts([m1,m2]),new Promise(r=>setTimeout(r,9000))])
+    .then(()=>setTimeout(go,Math.max(500,2200-(Date.now()-t0))));}
 
 function finishChild(){setProg(.92);confetti();S.child_finished=Date.now();snapSave("helpScreen");const thanks=LL("Дякую, що пограв(-ла) зі мною! Я — Мудра Сова, і наша пригода вдалась.","Спасибо, что играл(-а) со мной! Я — Мудрая Сова, и наше приключение удалось.","Thank you for playing with me! I am the Wise Owl, and our adventure was a success.");app.innerHTML=`<div class="screen"><div class="hero">${trophy()}</div><h1>${t("done")} 🏆</h1><div class="stars">⭐ ⭐ ⭐</div><p class="big" style="font-size:14px;margin-top:6px;opacity:.9">${thanks}</p><p class="big" style="font-size:15px;margin-top:10px">${LL("А тепер поклич дорослого й віддай йому телефон 📱","А теперь позови взрослого и отдай ему телефон 📱","Now call a grown-up and give them the phone 📱")}</p><button class="ghost" style="margin-top:14px" onclick="helpScreen()">↦ ${t("toParent")}</button></div>`;
   const _handoff=LL("А тепер поклич дорослого й віддай йому телефон.","А теперь позови взрослого и отдай ему телефон.","Now call a grown-up and give them the phone.");
   /* Одна фраза цілком, без повторного cancel(), щоб мобільний браузер не обірвав «Ти справжня зірочка» */
-  setTimeout(()=>say(t("done")+" "+_handoff),300);}
+  setTimeout(()=>sayParts([t("done"),_handoff]),300);}
 
 /* PARENT FORM */
 
@@ -2080,11 +2115,11 @@ function finishAll(){setProg(1);S.finished=Date.now();const sc=scoreChild();S.sc
    <p class="big" style="font-size:13px;opacity:.85;margin-top:14px">${shareMsg}</p>
    <p class="big" style="font-size:13px;opacity:.7;margin-top:8px">${t("finalNote")}</p>
    ${DATA_ENDPOINT?`<p id="sendst" class="big" style="font-size:13px;margin-top:8px"></p>`:""}</div>`;
- snapClear(); sendData();
+ snapClear(); sendData(); ping("complete");
 }
 /* Плоский запис сесії. withPII=false — без імені, дати народження та email (для надсилання дослідниці) */
 function buildFlat(withPII){const P=S.parent||{},sc=S.scores,pr=buildProfile();
- const flat={session:S.id,app_version:APP_VERSION,lang:S.lang,form:S.form||"A",retest_of:S.retestOf||"",run_no:S.runNo||"",
+ const flat={session:S.id,app_version:APP_VERSION,src:SRC,lang:S.lang,form:S.form||"A",retest_of:S.retestOf||"",run_no:S.runNo||"",
   ts_started:new Date(S.started).toISOString(),ts_finished:new Date(S.finished).toISOString(),resumed_n:S.resumed||0,
   child_age_months:pr.ageMonths??"",child_age_mode:S.ageMode||"",
   child_corsi_span:sc.corsi_span,child_dccs_correct:sc.dccs_correct,child_dccs_total:sc.dccs_total,child_attention_hits:sc.attention_hits,child_attention_total:sc.attention_total,child_attention_false:sc.attention_false,child_attention_time_s:sc.attention_time_s,child_memory_score:sc.memory_score,child_memory_hits:sc.memory_hits,child_memory_fa:sc.memory_fa,
