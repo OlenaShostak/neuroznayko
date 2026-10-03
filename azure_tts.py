@@ -136,16 +136,26 @@ def save(path, data):
     raise OSError(f"не вдалося записати файл ({last}). Спробуйте перенести папку з робочого столу, напр. у C:\\neuroznayko")
 
 def ask_credentials():
-    key = AZURE_KEY or os.environ.get("AZURE_SPEECH_KEY", "")
-    region = AZURE_REGION or os.environ.get("AZURE_SPEECH_REGION", "")
-    if not key:
+    key = (AZURE_KEY or os.environ.get("AZURE_SPEECH_KEY", "")).strip()
+    region = (AZURE_REGION or os.environ.get("AZURE_SPEECH_REGION", "")).strip()
+    ok_key = lambda k: re.fullmatch(r"[A-Za-z0-9]{20,100}", k or "") is not None
+    tries = 0
+    while not ok_key(key):
+        if key:
+            print("⚠ Ключ виглядає неправильно (мабуть, вставився двічі або разом із текстом). Вставте лише KEY 1, один раз.")
+        tries += 1
+        if tries > 3:
+            raise SystemExit("Не вдалося отримати коректний ключ. Скопіюйте KEY 1 з Azure ще раз.")
         key = input("Вставте KEY 1 з Azure (Keys and Endpoint) і натисніть Enter: ").strip()
-    if not region:
-        region = input("Введіть регіон (Location/Region), напр. westeurope: ").strip()
-    region = region.lower().replace(" ", "")
-    if not key or not region:
-        raise SystemExit("Потрібні ключ і регіон.")
-    return key, region
+    tries = 0
+    while not re.fullmatch(r"[a-z0-9]{3,40}", region.lower().replace(" ", "")):
+        if region:
+            print("⚠ Регіон має бути одним словом латиницею, напр. swedencentral")
+        tries += 1
+        if tries > 3:
+            raise SystemExit("Не вдалося отримати регіон.")
+        region = input("Введіть регіон (Location/Region), напр. swedencentral: ").strip()
+    return key, region.lower().replace(" ", "")
 
 def main():
     args = sys.argv[1:]
