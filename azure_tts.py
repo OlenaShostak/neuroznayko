@@ -9,9 +9,20 @@
 Вже створені файли пропускаються, тож скрипт можна запускати повторно (докачає лише нове).
 
 Запуск (у папці, де лежать цей файл і voice_manifest.json):
-    python azure_tts.py test      — пробна озвучка 4 фраз у папку audio/_test (послухати голоси)
-    python azure_tts.py           — озвучити все
-    python azure_tts.py --force   — перезаписати всі файли (наприклад, після зміни голосу)
+    python azure_tts.py test               — пробна озвучка 4 фраз у папку audio/_test (послухати голоси)
+    python azure_tts.py                    — озвучити все, чого ще немає
+    python azure_tts.py --force            — перезаписати всі файли (наприклад, після зміни голосу чи темпу)
+    python azure_tts.py --force --lang uk  — перезаписати лише одну мову (uk / ru / en / pl)
+    python azure_tts.py say uk "Дивись уважно, куди стрибає зайчик"
+                                           — озвучити будь-який текст у audio/_test/say_uk.mp3 (перевірка наголосів і темпу)
+    python azure_tts.py refresh "зайчик"   — переозвучити лише ті фрази, де є це слово (після виправлення вимови)
+
+ВИПРАВЛЕННЯ ВИМОВИ (наголоси): файл pronunciation.json поруч зі скриптом, наприклад
+    { "uk": { "розумниця": "<phoneme alphabet='ipa' ph='rozˈumnɪt͡sʲa'>розумниця</phoneme>" } }
+Значення може бути звичайним словом (перебудованим так, щоб голос читав правильно) або SSML-тегом
+<phoneme> із транскрипцією IPA (наголос — знак ˈ перед наголошеним складом).
+Перевірити варіант: python azure_tts.py say uk "Розумниця, натисни", потім refresh "розумниця".
+Інший голос для проби: python azure_tts.py say uk "текст" --voice uk-UA-OstapNeural
 
 Потрібен лише Python 3.8+; додаткові бібліотеки не потрібні.
 """
@@ -24,13 +35,14 @@ AZURE_REGION = ""       # напр. "westeurope" (поле Location/Region)
 
 # Голоси (можна замінити на альтернативні з коментаря)
 VOICES = {
-    "uk": "uk-UA-PolinaNeural",     # альтернатива: uk-UA-OstapNeural (чоловічий)
+    "uk": "de-DE-SeraphinaMultilingualNeural",   # Серафина (багатомовна) говорить українською без акценту; наголоси — pronunciation.json
+                                                 # альтернативи: uk-UA-OstapNeural (чоловічий), uk-UA-PolinaNeural
     "ru": "ru-RU-SvetlanaNeural",   # альтернатива: ru-RU-DariyaNeural
     "en": "en-US-AvaNeural",        # альтернатива: en-US-JennyNeural
     "pl": "pl-PL-ZofiaNeural",      # альтернатива: pl-PL-AgnieszkaNeural, pl-PL-MarekNeural
 }
 LOCALES = {"uk": "uk-UA", "ru": "ru-RU", "en": "en-US", "pl": "pl-PL"}
-RATE = "-5%"      # темп: трохи повільніше для дошкільнят ("0%" — звичайний)
+RATE = {"uk": "0%", "ru": "0%", "en": "-5%", "pl": "-3%"}   # темп для кожної мови окремо ("0%" — звичайний, "+10%" — швидше)
 PITCH = "+0%"     # висота голосу
 PAUSE_SEC = 3.2   # пауза між запитами (безкоштовний тариф має обмеження кількості запитів за хвилину)
 # ============================================================
@@ -44,23 +56,45 @@ except Exception:
 
 EMOJI = re.compile("[\U0001F000-\U0001FAFF\u2600-\u27BF\uFE0F\u200D]")
 
+def load_pron():
+    p = os.path.join(HERE, "pronunciation.json")
+    if not os.path.exists(p):
+        return {}
+    try:
+        return json.load(open(p, encoding="utf-8"))
+    except Exception as e:
+        raise SystemExit("pronunciation.json містить помилку: %s" % e)
+
+PRON = {}
+
+def apply_pron(lang, text, voice=None):
+    table = PRON.get(voice or VOICES.get(lang, "")) or PRON.get(lang) or {}   # спершу розділ для конкретного голосу, потім для мови
+    for src, dst in table.items():
+        text = re.sub(r"(?<!\w)" + re.escape(src) + r"(?!\w)", dst, text, flags=re.IGNORECASE)
+    return text
+
 def clean(text):
     t = re.sub(r"<[^>]+>", " ", text)          # прибрати HTML-теги
     t = html.unescape(t)
     t = EMOJI.sub("", t)                       # прибрати емодзі
+    t = t.replace("'", "\u02bc").replace("\u2019", "\u02bc")   # український апостроф ʼ (U+02BC) — голос читає його правильніше
     t = re.sub(r"\s+", " ", t).strip()
     return t
 
-def ssml(lang, text):
+def ssml(lang, text, voice=None):
     t = (text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+    voice = voice or VOICES[lang]
+    t = apply_pron(lang, t, voice)   # заміни з pronunciation.json; значення можуть містити SSML-теги (<phoneme …>)
+    rate = RATE[lang] if isinstance(RATE, dict) else RATE
     return (f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="{LOCALES[lang]}">'
-            f'<voice name="{VOICES[lang]}"><prosody rate="{RATE}" pitch="{PITCH}">{t}</prosody></voice></speak>')
+            f'<voice name="{voice}">' + (f'<lang xml:lang="{LOCALES[lang]}">' if "Multilingual" in voice else '') +
+            f'<prosody rate="{rate}" pitch="{PITCH}">{t}</prosody>' + ('</lang>' if "Multilingual" in voice else '') + '</voice></speak>')
 
 def endpoint(region):
     return os.environ.get("AZURE_TTS_ENDPOINT") or f"https://{region}.tts.speech.microsoft.com/cognitiveservices/v1"
 
-def synth(key, region, lang, text):
-    body = ssml(lang, clean(text)).encode("utf-8")
+def synth(key, region, lang, text, voice=None, raw_body=None):
+    body = (raw_body or ssml(lang, clean(text), voice)).encode("utf-8")
     req = urllib.request.Request(endpoint(region), data=body, method="POST", headers={
         "Ocp-Apim-Subscription-Key": key,
         "Content-Type": "application/ssml+xml",
@@ -119,7 +153,57 @@ def main():
     if not os.path.exists(manifest_path):
         raise SystemExit("Не знайдено voice_manifest.json поруч зі скриптом.")
     man = json.load(open(manifest_path, encoding="utf-8"))
+    global PRON
+    PRON = load_pron()
     key, region = ask_credentials()
+
+    if args and args[0] == "variants":
+        # python azure_tts.py variants uk <голос>  — озвучує всі варіанти слів із variants.json одним файлом, з номерами
+        if len(args) < 3:
+            raise SystemExit("Використання: python azure_tts.py variants uk de-DE-SeraphinaMultilingualNeural")
+        lang, voice = args[1], args[2]
+        vp = os.path.join(HERE, "variants.json")
+        if not os.path.exists(vp):
+            raise SystemExit("Не знайдено variants.json поруч зі скриптом.")
+        V = json.load(open(vp, encoding="utf-8"))
+        esc = lambda x: x.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        parts, n = [], 0
+        print("\nНОМЕРИ ВАРІАНТІВ:")
+        for word, entry in V.items():
+            # запис може бути списком варіантів або {"context": "речення з {w}", "cands": [...]} — тоді слово звучить у реченні
+            ctx, cands = ("{w}", entry) if isinstance(entry, list) else (entry.get("context", "{w}"), entry["cands"])
+            for c in cands:
+                n += 1
+                shown = c if not c.startswith("<") else "(транскрипція IPA)"
+                print(f"  {n:>2}. {word}  →  {ctx.replace('{w}', shown)}")
+                piece = c if c.startswith("<") else esc(c)
+                sent = apply_pron(lang, esc(clean(ctx.replace("{w}", "\uE000"))), voice).replace("\uE000", piece)
+                parts.append(f"{n}. <break time='250ms'/>{sent}<break time='900ms'/>")
+        rate = RATE[lang] if isinstance(RATE, dict) else RATE
+        inner = f'<prosody rate="{rate}" pitch="{PITCH}">' + " ".join(parts) + "</prosody>"
+        if "Multilingual" in voice:
+            inner = f'<lang xml:lang="{LOCALES[lang]}">' + inner + "</lang>"
+        body = (f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="{LOCALES[lang]}">'
+                f'<voice name="{voice}">{inner}</voice></speak>')
+        out = os.path.join(HERE, "audio", "_test"); os.makedirs(out, exist_ok=True)
+        p = os.path.join(out, "variants.mp3"); save(p, synth(key, region, lang, "", voice, raw_body=body))
+        print("\n✓ " + p + "\nПослухайте й запишіть номери, що звучать правильно.")
+        return
+
+    if args and args[0] == "say":
+        if len(args) < 3:
+            raise SystemExit('Використання: python azure_tts.py say uk "текст"')
+        rest = args[2:]
+        voice = None
+        if "--voice" in rest:
+            i = rest.index("--voice"); voice = rest[i + 1]; rest = rest[:i] + rest[i + 2:]
+        if "--plain" in rest:            # без замін із pronunciation.json
+            rest.remove("--plain"); PRON = {}
+        lang, text = args[1], " ".join(rest)
+        out = os.path.join(HERE, "audio", "_test"); os.makedirs(out, exist_ok=True)
+        p = os.path.join(out, f"say_{lang}.mp3"); save(p, synth(key, region, lang, text, voice))
+        print("✓ " + p + "   (темп " + (RATE[lang] if isinstance(RATE, dict) else RATE) + ")")
+        return
 
     if args and args[0] == "test":
         out = os.path.join(HERE, "audio", "_test"); os.makedirs(out, exist_ok=True)
@@ -131,16 +215,22 @@ def main():
         print("\nПослухайте файли в audio/_test. Якщо голоси подобаються — запустіть: python azure_tts.py")
         return
 
-    force = "--force" in args
+    force = "--force" in args or (args and args[0] == "refresh")
+    only_langs = [a for i, a in enumerate(args) if i > 0 and args[i - 1] == "--lang"]
+    frag = " ".join(a for a in args[1:] if not a.startswith("--")) if args and args[0] == "refresh" else ""
+    if args and args[0] == "refresh" and not frag:
+        raise SystemExit('Використання: python azure_tts.py refresh "слово або фраза"')
     jobs = []
     for section in ("app", "bank"):
         for lang, items in man[section].items():
-            if lang not in VOICES:
+            if lang not in VOICES or (only_langs and lang not in only_langs):
                 continue
             folder = os.path.join(HERE, "audio", section, lang)
             os.makedirs(folder, exist_ok=True)
             for name, text in items.items():
                 path = os.path.join(folder, name + ".mp3")
+                if frag and frag.lower() not in clean(text).lower():
+                    continue
                 if force or not os.path.exists(path) or os.path.getsize(path) == 0:
                     jobs.append((section, lang, name, text, path))
     chars = sum(len(clean(j[3])) for j in jobs)
