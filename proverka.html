@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Перевірка озвучки — НейроЗнайко</title>
+<style>
+  :root{--ink:#253047;--soft:#56607a;--scarf:#4a6fa1;--line:#d9e0ea;--mist:#eef2f7;--bad:#c0504d}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#fff;font-size:17px}
+  header{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:12px 16px;z-index:2}
+  h1{font-size:20px;margin:0 0 8px}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  button,select{font:inherit;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
+  button.main{background:var(--scarf);color:#fff;border-color:var(--scarf)}
+  .hint{font-size:14px;color:var(--soft);margin-top:6px}
+  main{padding:8px 16px 80px;max-width:900px;margin:0 auto}
+  h2{font-size:18px;margin:22px 0 6px}
+  .row{display:grid;grid-template-columns:40px 44px 1fr 28px;gap:8px;align-items:center;padding:8px 6px;border-bottom:1px solid var(--line)}
+  .row.now{background:var(--mist)}
+  .row.bad .txt{color:var(--bad);font-weight:600}
+  .row.missing .txt::after{content:"  (файлу немає)";color:var(--soft);font-size:13px;font-weight:400}
+  .n{color:var(--soft);font-size:14px;text-align:right}
+  .play{padding:6px 0;width:44px}
+  .txt{line-height:1.35}
+  input[type=checkbox]{width:22px;height:22px}
+  #out{width:100%;min-height:90px;margin-top:8px;font:inherit;font-size:15px;display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>Перевірка озвучки</h1>
+  <div class="bar">
+    <select id="lang"><option value="uk">Українська</option><option value="ru">Русский</option><option value="en">English</option><option value="pl">Polski</option></select>
+    <button class="main" id="all">▶ Усі підряд</button>
+    <button id="stop">■ Стоп</button>
+    <button id="copy">Скопіювати позначені</button>
+  </div>
+  <div class="hint">Натисніть ▶ біля фрази або «Усі підряд». Фрази з помилкою позначте галочкою праворуч, потім «Скопіювати позначені» й надішліть список. Наголос можна дописати в повідомленні: метЕлик, парасОлька.</div>
+  <textarea id="out" readonly></textarea>
+</header>
+<main id="list">Завантаження…</main>
+<script>
+(function(){
+  let MAN=null, rows=[], cur=-1, playing=false;
+  const audio=new Audio();
+  const $=id=>document.getElementById(id);
+  const params=new URLSearchParams(location.search);
+  if(params.get("lang")) $("lang").value=params.get("lang");
+
+  fetch("voice_manifest.json",{cache:"no-store"}).then(r=>r.json()).then(m=>{MAN=m;render();})
+    .catch(()=>{$("list").textContent="Не вдалося завантажити voice_manifest.json — сторінка має лежати поруч із ним на сайті.";});
+
+  function render(){
+    const L=$("lang").value; rows=[]; let h="", n=0;
+    [["app","Застосунок (скринінг)"],["bank","Банк ігор"]].forEach(([sec,title])=>{
+      const items=Object.entries((MAN[sec]||{})[L]||{});
+      h+=`<h2>${title} · ${items.length}</h2>`;
+      items.forEach(([k,txt])=>{
+        n++; rows.push({sec,k,txt,url:`audio/${sec}/${L}/${k}.mp3`});
+        h+=`<div class="row" id="r${n-1}"><span class="n">${n}</span><button class="play" data-i="${n-1}">▶</button><span class="txt">${txt.replace(/</g,"&lt;")}</span><input type="checkbox" data-i="${n-1}" aria-label="помилка"></div>`;
+      });
+    });
+    $("list").innerHTML=h; cur=-1;
+    document.querySelectorAll(".play").forEach(b=>b.onclick=()=>{playing=false;play(+b.dataset.i);});
+    document.querySelectorAll("input[type=checkbox]").forEach(c=>c.onchange=()=>document.getElementById("r"+c.dataset.i).classList.toggle("bad",c.checked));
+  }
+  function play(i){
+    if(i<0||i>=rows.length){playing=false;return;}
+    document.querySelectorAll(".row.now").forEach(r=>r.classList.remove("now"));
+    const el=document.getElementById("r"+i); el.classList.add("now"); el.scrollIntoView({block:"center",behavior:"smooth"});
+    cur=i; audio.src=rows[i].url+"?v="+Date.now();
+    audio.onended=()=>{ if(playing) setTimeout(()=>play(i+1),500); };
+    audio.onerror=()=>{ el.classList.add("missing"); if(playing) setTimeout(()=>play(i+1),200); };
+    audio.play().catch(()=>{});
+  }
+  $("all").onclick=()=>{playing=true;play(cur<0||cur>=rows.length-1?0:cur+1);};
+  $("stop").onclick=()=>{playing=false;audio.pause();};
+  $("lang").onchange=()=>{playing=false;audio.pause();render();};
+  $("copy").onclick=()=>{
+    const L=$("lang").value;
+    const sel=[...document.querySelectorAll("input[type=checkbox]:checked")].map(c=>{const r=rows[+c.dataset.i];return `${+c.dataset.i+1}. [${L}] ${r.txt}`;});
+    const t=sel.length?("Помилки в озвучці:\n"+sel.join("\n")):"Нічого не позначено";
+    const out=$("out"); out.style.display="block"; out.value=t; out.select();
+    try{document.execCommand("copy");}catch(e){} if(navigator.clipboard) navigator.clipboard.writeText(t).catch(()=>{});
+  };
+})();
+</script>
+</body>
+</html>
