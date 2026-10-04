@@ -912,7 +912,7 @@ function audWord(k){const w=AUD_WORDS[k]||[k,k,k,k];return lang==="uk"?w[0]:lang
 function _audMax(){return S.ageMode==="full"?6:5;}
 const AUD_T=()=>({title:LL("Гра «Що сказала Сова»","Игра «Что сказала Сова»","Game \"What the Owl said\"","Gra «Co powiedziała Sowa»"),
   listen:LL("Слухай уважно і запам'ятай слова по порядку!","Слушай внимательно и запомни слова по порядку!","Listen carefully and remember the words in order!","Słuchaj uważnie i zapamiętaj słowa po kolei!"),
-  ask:LL("Натисни картинки в тому самому порядку","Нажми картинки в том же порядке","Tap the pictures in the same order","Naciśnij obrazki w tej samej kolejności")});
+  ask:LL("Натисни на картинки в тому самому порядку","Нажми на картинки в том же порядке","Tap the pictures in the same order","Naciśnij obrazki w tej samej kolejności")});
 function blockAudMem(){ trialStop(); audRun(S.ageMode==="full"?3:2,0,0); }
 function audRun(len,attempt,prevSpan){
   const T2=AUD_T(), pool=formPool(AUD_KEYS,"audmem"), r=_rng("aud-"+len+"-"+attempt);
