@@ -172,6 +172,7 @@ def main():
         if len(args) < 3:
             raise SystemExit("Використання: python azure_tts.py variants uk de-DE-SeraphinaMultilingualNeural")
         lang, voice = args[1], args[2]
+        separate = "--separate" in args   # кожен варіант — окремим файлом audio/_test/v01.mp3, v02.mp3… (як звучатиме в застосунку)
         vp = os.path.join(HERE, "variants.json")
         if not os.path.exists(vp):
             raise SystemExit("Не знайдено variants.json поруч зі скриптом.")
@@ -189,12 +190,25 @@ def main():
                 piece = c if c.startswith("<") else esc(c)
                 sent = apply_pron(lang, esc(clean(ctx.replace("{w}", "\uE000"))), voice).replace("\uE000", piece)
                 parts.append(f"{n}. <break time='250ms'/>{sent}<break time='900ms'/>")
+                if separate:
+                    r_ = RATE[lang] if isinstance(RATE, dict) else RATE
+                    one = f'<prosody rate="{r_}" pitch="{PITCH}">{sent}</prosody>'
+                    if "Multilingual" in voice:
+                        one = f'<lang xml:lang="{LOCALES[lang]}">' + one + "</lang>"
+                    b1 = (f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="{LOCALES[lang]}">'
+                          f'<voice name="{voice}">{one}</voice></speak>')
+                    od = os.path.join(HERE, "audio", "_test"); os.makedirs(od, exist_ok=True)
+                    save(os.path.join(od, f"v{n:02d}.mp3"), synth(key, region, lang, "", voice, raw_body=b1))
+                    time.sleep(PAUSE_SEC)
         rate = RATE[lang] if isinstance(RATE, dict) else RATE
         inner = f'<prosody rate="{rate}" pitch="{PITCH}">' + " ".join(parts) + "</prosody>"
         if "Multilingual" in voice:
             inner = f'<lang xml:lang="{LOCALES[lang]}">' + inner + "</lang>"
         body = (f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="{LOCALES[lang]}">'
                 f'<voice name="{voice}">{inner}</voice></speak>')
+        if separate:
+            print("\n✓ Окремі файли: audio\\_test\\v01.mp3 … v%02d.mp3 — кожен звучить так, як звучатиме в застосунку." % n)
+            return
         out = os.path.join(HERE, "audio", "_test"); os.makedirs(out, exist_ok=True)
         p = os.path.join(out, "variants.mp3"); save(p, synth(key, region, lang, "", voice, raw_body=body))
         print("\n✓ " + p + "\nПослухайте й запишіть номери, що звучать правильно.")
