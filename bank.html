@@ -115,6 +115,47 @@ p.big{font-size:clamp(15px,3.6vw,19px);line-height:1.4;margin:.3em 0 .6em;max-wi
 .oi{font-size:34px;flex:none}.ot{font-weight:900;font-size:16px;color:var(--ink)}.od{font-size:11px;font-weight:800;color:#a57a1c;text-transform:uppercase;letter-spacing:.4px;margin:2px 0 4px}.oh{font-size:14px;line-height:1.45}
 .orules{margin:16px 0 6px;font-size:14px;line-height:1.7;text-align:left;max-width:560px}
 @media print{body{background:#fff!important;color:#000}.noprint,.progress{display:none!important}.offpage h2,.offpage p.big,.orules{color:#000}.ocard{box-shadow:none;border:1px solid #ccc}.foot{color:#555}}
+
+/* ---- нові ігри ---- */
+.scr-scene{justify-content:flex-start;padding-top:10px}
+.scene{position:relative;width:100%;max-width:640px;aspect-ratio:1600/995;background-size:cover;background-position:center;border-radius:16px;box-shadow:0 6px 14px rgba(0,0,0,.28);overflow:hidden;margin:6px auto}
+.sobj{position:absolute;pointer-events:none}.sobj img{width:100%;height:auto;display:block;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.sobj.tapme{pointer-events:auto;cursor:pointer}
+.sobj.okmark{outline:4px solid var(--good);outline-offset:3px;border-radius:50%}
+.sobj.nomark{animation:shake .4s}
+.hot{position:absolute;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);cursor:pointer}
+.hot.found{border:4px solid var(--good);box-shadow:0 0 0 3px rgba(255,255,255,.7)}
+.missmark{position:absolute;transform:translate(-50%,-50%);color:var(--bad);font-size:26px;font-weight:900;pointer-events:none;text-shadow:0 0 3px #fff}
+@keyframes shake{0%,100%{transform:translate(-50%,-100%)}25%{transform:translate(-56%,-100%)}75%{transform:translate(-44%,-100%)}}
+.pzsample{width:110px;margin:4px auto 8px;background:var(--paper);border-radius:10px;padding:4px;box-shadow:0 3px 8px rgba(0,0,0,.2)}.pzsample.wide{width:150px}.pzsample img{width:100%;display:block;border-radius:6px}
+.pz{display:grid;gap:3px;width:100%;max-width:460px;margin:0 auto;background:#1c2438;border-radius:12px;padding:3px}
+.pz.paper{background:#d9d3c4}.pz.paper .pc{background-color:var(--paper)}
+.pc{width:100%;height:100%;background-repeat:no-repeat;border-radius:6px;cursor:pointer;transition:transform .12s}
+.pc.sel{outline:4px solid var(--gold);transform:scale(.94)}
+.pz.solved{gap:0;padding:0;box-shadow:0 0 0 5px var(--good)}
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--paper);border-radius:16px;padding:10px;width:100%;max-width:340px;margin:6px auto}
+.cgrid div{aspect-ratio:1;display:flex;align-items:center;justify-content:center}.cgrid img{width:88%;height:88%;object-fit:contain}
+.cgrid.small{max-width:none;padding:6px;gap:3px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:560px}
+.cbox{cursor:pointer;border-radius:18px;outline:0 solid transparent}.cbox.ok{outline:5px solid var(--good)}.cbox.no{outline:5px solid var(--bad)}
+.numtile{flex-direction:column;gap:2px}.numtile b{font-size:30px;color:var(--ink)}.numtile .dots{font-size:9px;color:var(--ink);letter-spacing:1px;max-width:76px;word-wrap:break-word;line-height:1.1}
+.codekey{display:flex;gap:8px;align-items:center;justify-content:center;background:var(--paper);color:var(--ink);border-radius:14px;padding:6px 12px;margin:4px auto 10px;font-weight:800}
+.codeline{display:flex;gap:4px;justify-content:center;margin:10px 0 0}.codeline i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.25)}.codeline i.d{background:var(--good)}.codeline i.c{background:var(--gold)}
+.palette{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}.pcol{width:64px;height:64px;border-radius:50%;border:4px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.3);cursor:pointer}
+.pcol.ok{outline:4px solid var(--good)}.pcol.no{outline:4px solid var(--bad)}
+.maze{position:relative;width:min(92vw,420px);aspect-ratio:1;background:var(--paper);border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,.28);margin:6px auto}
+.maze svg{position:absolute;inset:0;width:100%;height:100%}.maze .walls line,.maze .walls rect{stroke:#4a3b2a;stroke-width:1.6;stroke-linecap:round}
+.mzc{position:absolute;cursor:pointer}.mzhero,.mzgoal{position:absolute;display:flex;align-items:center;justify-content:center;pointer-events:none;transition:left .18s,top .18s}
+.mzhero img,.mzgoal img{width:82%;height:82%;object-fit:contain}.maze.bump{animation:mzb .3s}.maze.solved{box-shadow:0 0 0 5px var(--good)}
+@keyframes mzb{0%,100%{transform:translateX(0)}30%{transform:translateX(-5px)}70%{transform:translateX(5px)}}
+.dictcue{font-size:30px;min-height:40px;letter-spacing:4px;color:#fff}
+.dgrid{position:relative;display:grid;width:min(92vw,420px);aspect-ratio:1;background:var(--paper);border-radius:10px;margin:4px auto;overflow:hidden}
+.dgrid > div{border:1px solid #b9c7dd;cursor:pointer}.dgrid > div.okc{background:#cfe6c3}.dgrid > div.noc{background:#f1c6bb}.dgrid > div.hint{background:#f6e3a8}
+.dgrid svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.ddot{position:absolute;width:16px;height:16px;border-radius:50%;background:var(--bad);transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 0 0 3px #fff}
+.dgrid.solved{box-shadow:0 0 0 5px var(--good)}
+.storyhero img{width:110px;height:110px;object-fit:contain}.storytxt{max-width:520px;font-size:15px;opacity:.85;line-height:1.4}
+.tile.big img,.tile img{max-width:100%;max-height:100%;object-fit:contain}
 </style>
 </head>
 <body>
@@ -1206,6 +1247,307 @@ GAME.suitcase=function(){
         else{fail=true;d.classList.add('no');setTimeout(()=>win(L().suit_res(best),best/maxLen),900);}};s.appendChild(d);});};
   put();
 };
+
+/* ================= НОВІ ІГРИ (жовтень 2026) =================
+   Картинки нових предметів і фонів — файли img/bank/*.webp (стиль класичної дитячої книжки).
+   Ігри: dict (графічний диктант), maze (лабіринт), diff (знайди відмінності), code (шифрування),
+   absurd (що неправильно), puzzle (склади картинку), count (рахуємо й порівнюємо), story (слухаємо історію). */
+const NIMG='img/bank/';
+['ball','balloon','banana','bus','elephant','fish','lemon','lion','moon','pineapple','spoon','sun','hat','pinecone',
+ 'hedgehog','squirrel','carrot','cheese','bone','mushroom','acorn','boat','sled','snowman','mittens','plate','basket',
+ 'place_forest','place_river','place_garden'].forEach(k=>{XIMG[k]=NIMG+k+'.webp';});
+if(!OBJ.hat)OBJ.hat=[null,'🧢','шап-ка','шап-ка','hat','ш','ш','h'];
+if(!OBJ.pinecone)OBJ.pinecone=[null,'🌰','шиш-ка','шиш-ка','pine-cone','ш','ш','p'];
+try{if(!OBJ_PL.hat)OBJ_PL.hat=['czap-ka','cz'];if(!OBJ_PL.pinecone)OBJ_PL.pinecone=['szysz-ka','sz'];}catch(e){}
+function SP(k,st){const s=XIMG[k]||IMG[k];return s?`<img src="${s}" alt="" draggable="false" style="${st||''}"/>`:'';}
+const hasPic=k=>!!(XIMG[k]||IMG[k]);
+function TX(o){return o[LANG]||o.uk;}
+const TXT={
+ diff_p:{uk:'Знайди відмінності на нижній картинці',ru:'Найди отличия на нижней картинке',en:'Find the differences in the bottom picture',pl:'Znajdź różnice na dolnym obrazku'},
+ absurd_p:{uk:'Що тут неправильно? Натисни',ru:'Что здесь неправильно? Нажми',en:"What's wrong here? Tap it",pl:'Co tu jest nie tak? Naciśnij'},
+ puzzle_p:{uk:'Натисни на два шматочки — вони поміняються місцями',ru:'Нажми на два кусочка — они поменяются местами',en:'Tap two pieces to swap them',pl:'Naciśnij dwa kawałki — zamienią się miejscami'},
+ count_p:{uk:'Скільки тут предметів?',ru:'Сколько здесь предметов?',en:'How many are there?',pl:'Ile tu jest przedmiotów?'},
+ more_p:{uk:'Де предметів більше?',ru:'Где предметов больше?',en:'Where are there more?',pl:'Gdzie jest więcej?'},
+ less_p:{uk:'Де предметів менше?',ru:'Где предметов меньше?',en:'Where are there fewer?',pl:'Gdzie jest mniej?'},
+ code_p:{uk:'Якого кольору має бути фігура? Дивись на зразок',ru:'Какого цвета должна быть фигура? Смотри на образец',en:'What colour should the shape be? Look at the key',pl:'Jakiego koloru ma być figura? Spójrz na wzór'},
+ code_key:{uk:'Зразок:',ru:'Образец:',en:'Key:',pl:'Wzór:'},
+ maze_p:{uk:'Натискай на клітинки поруч із героєм',ru:'Нажимай на клеточки рядом с героем',en:'Tap the squares next to the hero',pl:'Naciskaj kratki obok bohatera'},
+ dict_p:{uk:'Слухай Сову й натискай на потрібну клітинку',ru:'Слушай Сову и нажимай на нужную клеточку',en:'Listen to the Owl and tap the right square',pl:'Słuchaj Sowy i naciskaj właściwą kratkę'},
+ story_listen:{uk:'Послухай казочку',ru:'Послушай сказку',en:'Listen to the story',pl:'Posłuchaj bajki'},
+ story_again:{uk:'🔊 Ще раз',ru:'🔊 Ещё раз',en:'🔊 Again',pl:'🔊 Jeszcze raz'},
+ story_go:{uk:'Відповідати ▶',ru:'Отвечать ▶',en:'Answer ▶',pl:'Odpowiadaj ▶'},
+ res_diff:{uk:(f,t)=>`Знайдено відмінностей: ${f} із ${t}!`,ru:(f,t)=>`Найдено отличий: ${f} из ${t}!`,en:(f,t)=>`Differences found: ${f} of ${t}!`,pl:(f,t)=>`Znalezione różnice: ${f} z ${t}!`},
+ res_absurd:{uk:(f,t)=>`Знайдено нісенітниць: ${f} із ${t}!`,ru:(f,t)=>`Найдено небылиц: ${f} из ${t}!`,en:(f,t)=>`Silly things found: ${f} of ${t}!`,pl:(f,t)=>`Znalezione niedorzeczności: ${f} z ${t}!`},
+ res_puzzle:{uk:n=>`Складено картинок: ${n}!`,ru:n=>`Собрано картинок: ${n}!`,en:n=>`Pictures completed: ${n}!`,pl:n=>`Ułożone obrazki: ${n}!`},
+ res_maze:{uk:n=>`Пройдено лабіринтів: ${n}!`,ru:n=>`Пройдено лабиринтов: ${n}!`,en:n=>`Mazes completed: ${n}!`,pl:n=>`Ukończone labirynty: ${n}!`},
+ res_code:{uk:(c,t,s)=>`Правильно: ${c} із ${t}. Час: ${s} с.`,ru:(c,t,s)=>`Правильно: ${c} из ${t}. Время: ${s} с.`,en:(c,t,s)=>`Correct: ${c} of ${t}. Time: ${s} s.`,pl:(c,t,s)=>`Poprawnie: ${c} z ${t}. Czas: ${s} s.`},
+};
+const SCENES={"meadow": {"bg": "bg_meadow", "slots": {"g1": [27, 86, 13.5, "ground"], "g2": [10, 72, 12.0, "ground"], "g3": [46, 79, 13.5, "ground"], "g4": [58, 96, 15.0, "ground"], "g5": [36, 67, 10.5, "ground"], "b1": [22, 33, 10.5, "branch"], "b2": [37, 28, 9.0, "branch"], "s1": [52, 24, 10.5, "sky"], "s2": [63, 14, 12.0, "sky"], "w1": [77, 87, 12.0, "water"], "r1": [80, 40, 13.5, "roof"]}, "normal": {"ground": ["ball", "basket", "mushroom", "hedgehog", "rabbit", "fox", "dog", "cat"], "branch": ["squirrel"], "sky": ["balloon", "sun", "butterfly", "bee"], "water": ["boat"]}, "absurd": [["fish", "branch"], ["snowman", "ground"], ["sled", "ground"], ["elephant", "roof"], ["bus", "water"], ["mittens", "branch"]]}, "winter": {"bg": "bg_winter", "slots": {"g1": [12, 92, 13.5, "ground"], "g2": [27, 82, 13.5, "ground"], "g3": [46, 68, 10.5, "ground"], "g4": [62, 67, 10.5, "ground"], "g5": [92, 95, 12.0, "ground"], "g6": [37, 63, 9.0, "ground"], "b1": [19, 40, 10.5, "branch"], "b2": [8, 28, 9.0, "branch"], "s1": [55, 20, 12.0, "sky"], "w1": [60, 86, 13.5, "ice"], "r1": [78, 28, 12.0, "roof"]}, "normal": {"ground": ["snowman", "sled", "mittens", "hat", "pinecone", "fox", "dog", "rabbit"], "branch": ["squirrel"], "sky": ["moon"], "ice": []}, "absurd": [["butterfly", "sky"], ["mushroom", "ground"], ["pineapple", "branch"], ["fish", "branch"], ["lemon", "branch"], ["boat", "ice"]]}, "room": {"bg": "bg_room", "slots": {"r1": [38, 86, 13.5, "floor"], "r2": [57, 90, 13.5, "floor"], "f1": [12, 96, 13.5, "floor"], "f2": [68, 97, 12.0, "floor"], "t1": [70, 58, 9.0, "table"], "c1": [84, 66, 7.5, "chair"], "h1": [75, 21, 7.5, "shelf"], "h2": [88, 21, 7.5, "shelf"], "h3": [75, 37, 7.5, "shelf"], "h4": [88, 37, 7.5, "shelf"], "k1": [50, 32, 10.5, "sky"]}, "normal": {"floor": ["ball", "car", "teddy", "basket", "puzzle", "kite"], "table": ["teacup", "puzzle", "pen", "apple"], "chair": ["teddy"], "shelf": ["car", "teacup", "ball", "pinecone", "plate"], "sky": ["balloon"]}, "absurd": [["snowman", "floor"], ["mushroom", "floor"], ["fish", "chair"], ["sun", "sky"], ["sled", "table"], ["boat", "shelf"]]}, "kitchen": {"bg": "bg_kitchen", "slots": {"s1": [15, 50, 10.5, "stove"], "t1": [40, 59, 9.0, "table"], "t2": [52, 59, 9.0, "table"], "t3": [64, 59, 9.0, "table"], "h1": [88, 24, 7.5, "shelf"], "h2": [88, 36, 7.5, "shelf"], "h3": [88, 45, 7.5, "shelf"], "f1": [30, 97, 12.0, "floor"], "f2": [80, 97, 13.5, "floor"], "a1": [50, 32, 10.5, "sky"]}, "normal": {"stove": ["teapot"], "table": ["plate", "cheese", "carrot", "banana", "lemon", "pear", "apple", "teacup", "spoon"], "shelf": ["teacup", "lemon", "pear", "plate"], "floor": ["basket"], "sky": []}, "absurd": [["boat", "stove"], ["fish", "sky"], ["sled", "table"], ["snowman", "floor"], ["mittens", "stove"], ["bus", "shelf"]]}};
+
+/* Сцена: фон + предмети-наклейки у слотах; x,y — середина нижнього краю предмета (%), w — ширина (% ширини сцени) */
+function sceneHTML(sc,items,id,extra){const S=SCENES[sc];
+  return `<div class="scene" id="${id}" style="background-image:url(${NIMG+S.bg}.webp)">${items.map(it=>{const [x,y0,w]=S.slots[it.slot];const y=Math.max(y0,w*1.2*1.55+2);   /* не виходити за верхній край */
+    const tf='translate(-50%,-100%)'+(it.mod==='mirror'?' scaleX(-1)':'');const fl=it.mod==='hue'?'filter:hue-rotate(150deg) saturate(1.5);':'';
+    return `<div class="sobj" data-slot="${it.slot}" style="left:${x}%;top:${y}%;width:${w*1.2}%;transform:${tf};${fl}">${SP(it.k)}</div>`;}).join('')}${extra||''}</div>`;}
+function pickNormals(S,n,usedSlots,usedK){const items=[];
+  for(const id of shuffle(Object.keys(S.slots))){if(items.length>=n)break;if(usedSlots.has(id))continue;
+    const pool=shuffle((S.normal[S.slots[id][3]]||[]).filter(k=>!usedK.has(k)&&hasPic(k)));if(!pool.length)continue;
+    usedSlots.add(id);usedK.add(pool[0]);items.push({slot:id,k:pool[0]});}
+  return items;}
+
+/* ===== 20) Знайди відмінності ===== */
+GAME.diff=function(){
+  const rounds=LV<=4?2:3;let round=0,found=0,miss=0,total=0;const order=shuffle(Object.keys(SCENES));
+  const go=()=>{if(curGame!=='diff')return;
+    if(round>=rounds)return win(TX(TXT.res_diff)(found,total),total?Math.max(0,(found-miss*0.34)/total):1);
+    const sc=order[round%order.length],S=SCENES[sc];
+    const usedSlots=new Set(),usedK=new Set();
+    const items=pickNormals(S,LV<=3?5:LV===4?6:7,usedSlots,usedK);
+    const nd=Math.min(items.length,LV<=3?3:LV===4?4:5);
+    const kinds=LV<=3?['remove','swap']:LV===4?['remove','swap','hue']:['remove','swap','hue','mirror'];
+    const idx=shuffle(items.map((_,i)=>i)).slice(0,nd);const itemsB=items.map(it=>Object.assign({},it));
+    idx.forEach((ix,j)=>{const it=itemsB[ix],kind=kinds[j%kinds.length];
+      if(kind==='remove')it.remove=true;
+      else if(kind==='swap'){const alt=shuffle((S.normal[S.slots[it.slot][3]]||[]).filter(k=>!usedK.has(k)&&hasPic(k)))[0];
+        if(alt){it.k=alt;usedK.add(alt);}else it.mod='hue';}
+      else it.mod=kind;});
+    const ch=idx.map(ix=>items[ix].slot);total+=ch.length;let left=ch.length;
+    const hot=ch.map(sid=>{const [x,y,w]=S.slots[sid];return `<div class="hot" data-slot="${sid}" style="left:${x}%;top:${y-w*0.9}%;width:${Math.max(13,w*1.7)}%"></div>`;}).join('');
+    app.innerHTML=topbar('diff')+`<div class="screen scr-scene"><p class="big">${TX(TXT.diff_p)}: <b id="dl">${left}</b></p>
+      ${sceneHTML(sc,items,'sa')}${sceneHTML(sc,itemsB.filter(i=>!i.remove),'sb',hot)}</div>`;
+    say('diff_intro');
+    const sb=document.getElementById('sb'),sa=document.getElementById('sa');
+    sb.onclick=e=>{const h=e.target.closest('.hot');
+      if(h){if(h.dataset.f)return;h.dataset.f=1;h.classList.add('found');const c=h.cloneNode();sa.appendChild(c);found++;left--;document.getElementById('dl').textContent=left;
+        if(left<=0){round++;setProg(round/rounds);setTimeout(go,1100);}}
+      else{miss++;const r=sb.getBoundingClientRect();const m=document.createElement('div');m.className='missmark';m.textContent='✖';
+        m.style.left=((e.clientX-r.left)/r.width*100)+'%';m.style.top=((e.clientY-r.top)/r.height*100)+'%';sb.appendChild(m);setTimeout(()=>m.remove(),650);}};
+  };
+  go();
+};
+
+/* ===== 21) Що неправильно на малюнку? ===== */
+GAME.absurd=function(){
+  const rounds=LV<=4?2:3;let round=0,found=0,miss=0,total=0;const order=shuffle(Object.keys(SCENES));
+  const go=()=>{if(curGame!=='absurd')return;
+    if(round>=rounds)return win(TX(TXT.res_absurd)(found,total),total?Math.max(0,(found-miss*0.34)/total):1);
+    const sc=order[round%order.length],S=SCENES[sc];const nAbs=LV<=3?1:LV===4?2:3;
+    const usedSlots=new Set(),usedK=new Set(),items=[];
+    for(const [k,tag] of shuffle(S.absurd)){if(items.length>=nAbs)break;if(!hasPic(k)||usedK.has(k))continue;
+      const sl=shuffle(Object.keys(S.slots).filter(id=>S.slots[id][3]===tag&&!usedSlots.has(id)))[0];if(!sl)continue;
+      usedSlots.add(sl);usedK.add(k);items.push({slot:sl,k,abs:true});}
+    items.push(...pickNormals(S,LV<=3?3:4,usedSlots,usedK));
+    const nA=items.filter(i=>i.abs).length;total+=nA;let left=nA;
+    app.innerHTML=topbar('absurd')+`<div class="screen scr-scene"><p class="big">${TX(TXT.absurd_p)}: <b id="al">${left}</b></p>${sceneHTML(sc,items,'sa')}</div>`;
+    say('absurd_intro');
+    document.querySelectorAll('#sa .sobj').forEach(el=>{el.classList.add('tapme');el.onclick=()=>{if(el.dataset.d)return;
+      const it=items.find(i=>i.slot===el.dataset.slot);
+      if(it&&it.abs){el.dataset.d=1;el.classList.add('okmark');found++;left--;document.getElementById('al').textContent=left;
+        if(left<=0){round++;setProg(round/rounds);setTimeout(go,1100);}}
+      else{miss++;el.classList.add('nomark');setTimeout(()=>el.classList.remove('nomark'),600);}};});
+  };
+  go();
+};
+
+/* ===== 22) Склади картинку ===== */
+GAME.puzzle=function(){
+  const rounds=3;let round=0,moves=0;
+  const scenes=shuffle(['bg_meadow','bg_winter','bg_room','bg_kitchen']);
+  const stickers=shuffle(['elephant','lion','squirrel','hedgehog','snowman','bus','pineapple','sun','basket','mushroom','fish','boat']);
+  const go=()=>{if(curGame!=='puzzle')return;
+    if(round>=rounds)return win(TX(TXT.res_puzzle)(rounds),1);
+    const useScene=LV>=5,[cols,rows]=LV<=3?[2,1]:LV===4?[2,2]:LV===5?[3,2]:[3,3];
+    const src=useScene?NIMG+scenes[round%scenes.length]+'.webp':XIMG[stickers[round%stickers.length]];
+    const ar=useScene?'1600/995':'1/1';const n=cols*rows;
+    let order=shuffle([...Array(n).keys()]);while(order.every((v,i)=>v===i))order=shuffle(order);
+    let sel=null,done=false;
+    app.innerHTML=topbar('puzzle')+`<div class="screen"><p class="big">${TX(TXT.puzzle_p)}</p>
+      <div class="pzsample${useScene?' wide':''}"><img src="${src}" alt=""/></div>
+      <div id="pz" class="pz${useScene?'':' paper'}" style="grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);aspect-ratio:${ar}"></div></div>`;
+    say('puzzle_intro');
+    const draw=()=>{const g=document.getElementById('pz');if(!g)return;
+      g.innerHTML=order.map((p,pos)=>{const px=p%cols,py=Math.floor(p/cols);
+        return `<div class="pc${sel===pos?' sel':''}" data-pos="${pos}" style="background-image:url(${src});background-size:${cols*100}% ${rows*100}%;background-position:${cols>1?px/(cols-1)*100:0}% ${rows>1?py/(rows-1)*100:0}%"></div>`;}).join('');
+      g.querySelectorAll('.pc').forEach(el=>el.onclick=()=>{if(done)return;const pos=+el.dataset.pos;
+        if(sel===null){sel=pos;return draw();} if(sel===pos){sel=null;return draw();}
+        [order[sel],order[pos]]=[order[pos],order[sel]];moves++;sel=null;draw();
+        if(order.every((v,i)=>v===i)){done=true;g.classList.add('solved');round++;setProg(round/rounds);setTimeout(go,1200);}});};
+    draw();
+  };
+  go();
+};
+
+/* ===== 23) Рахуємо й порівнюємо ===== */
+GAME.count=function(){
+  const total=LV<=3?6:9;let t=0,correct=0;const maxN=LV<=3?5:LV===4?7:10;
+  const pool=['apple','pear','orange','banana','lemon','carrot','mushroom','acorn','pinecone','ball','fish','balloon','cheese'].filter(hasPic);
+  const field=(k,n,cls)=>{const cells=shuffle([...Array(12).keys()]).slice(0,n);
+    return `<div class="cgrid ${cls||''}">${[...Array(12).keys()].map(i=>`<div>${cells.includes(i)?SP(k):''}</div>`).join('')}</div>`;};
+  const go=()=>{if(curGame!=='count')return;if(t>=total)return win(L().of(correct,total),correct/total);
+    const type=LV<=3?'count':['count','more','less'][t%3];
+    if(type==='count'){const k=pool[ri(0,pool.length-1)],n=ri(1,maxN);
+      const opts=shuffle([n,...shuffle([...Array(maxN).keys()].map(i=>i+1).filter(v=>v!==n&&Math.abs(v-n)<=3)).slice(0,LV<=3?2:3)]);
+      app.innerHTML=topbar('count')+`<div class="screen"><p class="big">${TX(TXT.count_p)}</p>${field(k,n)}${divider()}<div class="tiles" id="s"></div></div>`;
+      say('count_q');
+      const s=document.getElementById('s');
+      opts.forEach(v=>{const d=document.createElement('div');d.className='tile numtile';d.innerHTML=`<b>${v}</b><span class="dots">${'●'.repeat(v)}</span>`;
+        d.onclick=()=>{if(s.dataset.d)return;s.dataset.d=1;const ok=v===n;d.classList.add(ok?'ok':'no');if(ok)correct++;t++;setProg(t/total);setTimeout(go,750);};s.appendChild(d);});
+    }else{const k=pool[ri(0,pool.length-1)];let a=ri(1,maxN),b=ri(1,maxN);const gap=LV<=4?2:1;
+      while(Math.abs(a-b)<gap){a=ri(1,maxN);b=ri(1,maxN);}
+      const want=type==='more'?Math.max(a,b):Math.min(a,b);
+      app.innerHTML=topbar('count')+`<div class="screen"><p class="big">${TX(type==='more'?TXT.more_p:TXT.less_p)}</p>
+        <div class="cmp" id="s"><div class="cbox" data-n="${a}">${field(k,a,'small')}</div><div class="cbox" data-n="${b}">${field(k,b,'small')}</div></div></div>`;
+      say(type==='more'?'more_q':'less_q');
+      document.querySelectorAll('.cbox').forEach(d=>d.onclick=()=>{const s=document.getElementById('s');if(s.dataset.d)return;s.dataset.d=1;
+        const ok=+d.dataset.n===want;d.classList.add(ok?'ok':'no');if(ok)correct++;t++;setProg(t/total);setTimeout(go,750);});
+    }
+  };
+  go();
+};
+
+/* ===== 24) Шифрування (фігура → колір за зразком) ===== */
+GAME.code=function(){
+  const SH=['circle','triangle','square','star'],COL=['#c0392b','#2e6fb0','#3f8f4f','#e0a92d'];
+  const np=LV<=4?3:4;const sh=shuffle(SH).slice(0,np),cl=shuffle(COL).slice(0,np);const key={};sh.forEach((s,i)=>key[s]=cl[i]);
+  const total=LV<=3?8:LV===4?10:14;let t=0,correct=0;const t0=Date.now();
+  const svg=(s,fill,sz)=>{sz=sz||64;const st=`fill="${fill}" stroke="#2b2b2b" stroke-width="3"`;
+    const body=s==='circle'?`<circle cx="30" cy="30" r="24" ${st}/>`:s==='square'?`<rect x="8" y="8" width="44" height="44" rx="5" ${st}/>`:
+      s==='triangle'?`<path d="M30 6 L54 52 L6 52 Z" ${st}/>`:`<path d="M30 5 L37 23 L56 23 L41 35 L47 54 L30 42 L13 54 L19 35 L4 23 L23 23 Z" ${st}/>`;
+    return `<svg width="${sz}" height="${sz}" viewBox="0 0 60 60">${body}</svg>`;};
+  const seq=[];for(let i=0;i<total;i++)seq.push(sh[ri(0,np-1)]);
+  const go=()=>{if(curGame!=='code')return;
+    if(t>=total)return win(TX(TXT.res_code)(correct,total,Math.round((Date.now()-t0)/1000)),correct/total);
+    const s=seq[t];
+    app.innerHTML=topbar('code')+`<div class="screen"><p class="big">${TX(TXT.code_p)}</p>
+      <div class="codekey"><span>${TX(TXT.code_key)}</span>${sh.map(x=>`<span class="ck">${svg(x,key[x],40)}</span>`).join('')}</div>
+      <div class="stim" id="cs">${svg(s,'#ffffff',110)}</div>
+      <div class="codeline">${seq.map((x,i)=>`<i class="${i<t?'d':i===t?'c':''}"></i>`).join('')}</div>
+      ${divider()}<div class="palette" id="pal"></div></div>`;
+    if(t===0)say('code_intro');
+    const pal=document.getElementById('pal');
+    shuffle(cl).forEach(c=>{const b=document.createElement('button');b.className='pcol';b.style.background=c;
+      b.onclick=()=>{if(pal.dataset.d)return;pal.dataset.d=1;const ok=c===key[s];
+        document.getElementById('cs').innerHTML=svg(s,c,110);b.classList.add(ok?'ok':'no');if(ok)correct++;t++;setProg(t/total);setTimeout(go,ok?450:900);};pal.appendChild(b);});
+  };
+  go();
+};
+
+/* ===== 25) Лабіринт ===== */
+GAME.maze=function(){
+  const PAIRS=[['rabbit','carrot'],['mouse','cheese'],['dog','bone'],['bee','flower'],['squirrel','acorn'],['hedgehog','mushroom']].filter(p=>hasPic(p[0])&&hasPic(p[1]));
+  const rounds=3;let round=0,bumps=0,steps=0;const pairs=shuffle(PAIRS);
+  const go=()=>{if(curGame!=='maze')return;
+    if(round>=rounds)return win(TX(TXT.res_maze)(rounds),Math.max(0,1-bumps/(steps+bumps+1)));
+    const N=LV<=3?4:LV===4?5:LV===5?6:7,[hero,goal]=pairs[round%pairs.length];
+    const vis=Array(N*N).fill(false),open=new Set(),stack=[0];vis[0]=true;
+    while(stack.length){const c=stack[stack.length-1],x=c%N,y=Math.floor(c/N);
+      const nb=[[x+1,y],[x-1,y],[x,y+1],[x,y-1]].filter(([a,b])=>a>=0&&b>=0&&a<N&&b<N&&!vis[b*N+a]);
+      if(!nb.length){stack.pop();continue;}const [a,b]=nb[ri(0,nb.length-1)],n=b*N+a;vis[n]=true;open.add(Math.min(c,n)+'-'+Math.max(c,n));stack.push(n);}
+    const isOpen=(a,b)=>open.has(Math.min(a,b)+'-'+Math.max(a,b));
+    let pos=0;const goalC=N*N-1,trail=[0];const cs=100/N;
+    let walls='';for(let c=0;c<N*N;c++){const x=c%N,y=Math.floor(c/N);
+      if(x<N-1&&!isOpen(c,c+1))walls+=`<line x1="${(x+1)*cs}" y1="${y*cs}" x2="${(x+1)*cs}" y2="${(y+1)*cs}"/>`;
+      if(y<N-1&&!isOpen(c,c+N))walls+=`<line x1="${x*cs}" y1="${(y+1)*cs}" x2="${(x+1)*cs}" y2="${(y+1)*cs}"/>`;}
+    app.innerHTML=topbar('maze')+`<div class="screen"><p class="big">${TX(TXT.maze_p)}</p>
+      <div class="maze" id="mz"><svg viewBox="-1 -1 102 102" preserveAspectRatio="none"><g id="tr"></g><g class="walls">${walls}<rect x="0" y="0" width="100" height="100" fill="none"/></g></svg>
+      <div class="mzgoal" style="left:${(N-1)*cs}%;top:${(N-1)*cs}%;width:${cs}%;height:${cs}%">${SP(goal)}</div>
+      <div class="mzhero" id="hero" style="width:${cs}%;height:${cs}%">${SP(hero)}</div>
+      ${[...Array(N*N).keys()].map(c=>`<div class="mzc" data-c="${c}" style="left:${(c%N)*cs}%;top:${Math.floor(c/N)*cs}%;width:${cs}%;height:${cs}%"></div>`).join('')}</div></div>`;
+    say('maze_intro');
+    const place=()=>{const h=document.getElementById('hero');h.style.left=(pos%N)*cs+'%';h.style.top=Math.floor(pos/N)*cs+'%';
+      document.getElementById('tr').innerHTML=trail.length>1?`<polyline points="${trail.map(c=>`${(c%N+.5)*cs},${(Math.floor(c/N)+.5)*cs}`).join(' ')}" fill="none" stroke="#d8a93d" stroke-width="${cs*0.18}" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`:'';};
+    place();
+    document.querySelectorAll('.mzc').forEach(el=>el.onclick=()=>{const tc=+el.dataset.c;if(tc===pos)return;
+      const px=pos%N,py=Math.floor(pos/N),tx=tc%N,ty=Math.floor(tc/N);
+      if(px!==tx&&py!==ty)return;                                         /* лише по горизонталі або вертикалі */
+      const d=px===tx?(ty>py?N:-N):(tx>px?1:-1);let moved=false;
+      while(pos!==tc&&isOpen(pos,pos+d)){const nx=pos+d;if(trail.length>1&&trail[trail.length-2]===nx)trail.pop();else trail.push(nx);pos=nx;steps++;moved=true;}
+      if(pos!==tc){bumps++;const m=document.getElementById('mz');m.classList.add('bump');setTimeout(()=>m.classList.remove('bump'),350);}
+      if(moved)place();
+      if(pos===goalC){round++;setProg(round/rounds);document.getElementById('mz').classList.add('solved');setTimeout(go,1100);}});
+  };
+  go();
+};
+
+/* ===== 26) Графічний диктант ===== */
+GAME.dict=function(){
+  const G=LV<=4?6:8,maxStep=LV<=4?1:LV===5?2:3,nMoves=LV<=4?6:LV===5?7:8,rounds=2;
+  let round=0,ok=0,err=0,tot=0;const DIRS={r:[1,0],l:[-1,0],u:[0,-1],d:[0,1]};
+  const makePath=()=>{for(let tries=0;tries<200;tries++){let x=ri(1,2),y=G-1-ri(1,2);const cells=[[x,y]],seen=new Set([x+','+y]),moves=[];let lastDir=null;
+      for(let m=0;m<nMoves;m++){const opts=shuffle(Object.keys(DIRS)).filter(k=>k!==lastDir);let done=false;
+        for(const k of opts){const n=ri(1,maxStep),[dx,dy]=DIRS[k];let ok_=true,cx=x,cy=y;const add=[];
+          for(let s=0;s<n;s++){cx+=dx;cy+=dy;if(cx<0||cy<0||cx>=G||cy>=G||seen.has(cx+','+cy)){ok_=false;break;}add.push([cx,cy]);}
+          if(!ok_)continue;add.forEach(([a,b])=>{seen.add(a+','+b);cells.push([a,b]);});x=cx;y=cy;moves.push([k,n]);lastDir=k;done=true;break;}
+        if(!done)break;}
+      if(moves.length===nMoves)return {start:cells[0],moves};}
+    return {start:[1,G-2],moves:[['r',1],['u',1],['r',1],['u',1],['r',1],['d',1]]};};
+  const go=()=>{if(curGame!=='dict')return;
+    if(round>=rounds)return win(L().of(ok,tot),tot?ok/tot:1);
+    const P=makePath();let x=P.start[0],y=P.start[1],mi=0,wrong=0;const pts=[[x,y]];const cs=100/G;
+    app.innerHTML=topbar('dict')+`<div class="screen"><p class="big">${TX(TXT.dict_p)}</p>
+      <div class="dictcue" id="cue"></div>
+      <div class="dgrid" id="dg" style="grid-template-columns:repeat(${G},1fr)">${[...Array(G*G).keys()].map(c=>`<div data-c="${c}"></div>`).join('')}
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline id="dl" fill="none" stroke="#33406b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="ddot" id="dd"></span></div></div>`;
+    const cells=[...document.querySelectorAll('#dg > div')];
+    const draw=()=>{document.getElementById('dl').setAttribute('points',pts.map(([a,b])=>`${(a+.5)*cs},${(b+.5)*cs}`).join(' '));
+      const dd=document.getElementById('dd');dd.style.left=(x+.5)*cs+'%';dd.style.top=(y+.5)*cs+'%';};
+    const arrow={r:'➡',l:'⬅',u:'⬆',d:'⬇'};
+    const ask=()=>{if(mi>=P.moves.length){round++;setProg(round/rounds);document.getElementById('dg').classList.add('solved');return setTimeout(go,1200);}
+      const [k,n]=P.moves[mi];wrong=0;document.getElementById('cue').textContent=LV<=4?arrow[k].repeat(n):'🦉 …';
+      sayQueue(mi===0&&round===0?['dict_intro','d_'+n+'_'+k]:['d_'+n+'_'+k],.4);};
+    cells.forEach(el=>el.onclick=()=>{if(mi>=P.moves.length)return;const c=+el.dataset.c,cx=c%G,cy=Math.floor(c/G);
+      const [k,n]=P.moves[mi],[dx,dy]=DIRS[k],tx=x+dx*n,ty=y+dy*n;
+      if(cx===tx&&cy===ty){for(let s=1;s<=n;s++)pts.push([x+dx*s,y+dy*s]);x=tx;y=ty;tot++;if(wrong===0)ok++;mi++;draw();el.classList.add('okc');setTimeout(()=>el.classList.remove('okc'),400);setTimeout(ask,450);}
+      else{wrong++;el.classList.add('noc');setTimeout(()=>el.classList.remove('noc'),450);
+        if(wrong===2){const t_=cells[ty*G+tx];t_.classList.add('hint');setTimeout(()=>t_.classList.remove('hint'),1500);}
+        else sayQueue(['d_'+n+'_'+k]);}});
+    draw();ask();
+  };
+  go();
+};
+
+/* ===== 27) Слухаємо історію ===== */
+const STORIES=[
+ {id:'st1',hero:['hedgehog'],min:4,q:[['q1_1','place_forest',['place_forest','place_river','place_garden']],['q1_2','mushroom',['mushroom','carrot','pear']],['q1_3','squirrel',['squirrel','fox','rabbit']]]},
+ {id:'st2',hero:['rabbit'],min:4,q:[['q2_1','place_garden',['place_garden','place_forest','place_river']],['q2_2','carrot',['carrot','mushroom','banana']],['q2_3','boat',['boat','sled','bus']]]},
+ {id:'st3',hero:['mouse'],min:4,q:[['q3_1','sled',['sled','boat','bus']],['q3_2','mittens',['mittens','hat','ball']],['q3_3','dog',['dog','cat','fox']]]},
+ {id:'st4',hero:['elephant','lion'],min:5,q:[['q4_1','place_river',['place_river','place_forest','place_garden']],['q4_2','ball',['ball','balloon','spoon']],['q4_3','banana',['banana','lemon','pineapple']]]},
+];
+GAME.story=function(){
+  let avail=STORIES.filter(s=>AGE>=s.min);if(!avail.length)avail=STORIES.slice(0,3);const idx=lsGet('owl_story_i',0)%avail.length;lsSet('owl_story_i',idx+1);
+  const st=avail[idx];const qs=LV<=4?st.q.slice(0,2):st.q;let qi=0,correct=0;
+  const txt=(VOICE_TXT[st.id]||[])[['uk','ru','en','pl'].indexOf(LANG)]||'';
+  const listen=()=>{if(curGame!=='story')return;
+    app.innerHTML=topbar('story')+`<div class="screen"><h2>${TX(TXT.story_listen)}</h2>
+      <div class="stim storyhero">${st.hero.map(h=>SP(h)).join('')}</div>
+      <p class="storytxt">${txt}</p>
+      <div><button class="btn sec" id="sa">${TX(TXT.story_again)}</button><button class="btn" id="sg" disabled>${TX(TXT.story_go)}</button></div></div>`;
+    const en=()=>{const b=document.getElementById('sg');if(b)b.disabled=false;};
+    sayQueue([st.id]).then(en,en);setTimeout(en,9000);
+    document.getElementById('sa').onclick=()=>sayQueue([st.id]);document.getElementById('sg').onclick=ask;};
+  const ask=()=>{if(curGame!=='story')return;if(qi>=qs.length)return win(L().of(correct,qs.length),correct/qs.length);
+    const [qk,ans,opts]=qs[qi];const qt=(VOICE_TXT[qk]||[])[['uk','ru','en','pl'].indexOf(LANG)]||'';
+    app.innerHTML=topbar('story')+`<div class="screen"><p class="big">${qt}</p>${divider()}<div class="tiles" id="s"></div>
+      <button class="linkbtn" id="rl">${TX(TXT.story_again)}</button></div>`;
+    say(qk);document.getElementById('rl').onclick=()=>sayQueue([st.id]);
+    const s=document.getElementById('s');
+    shuffle(opts.filter(hasPic)).forEach(o=>{const d=document.createElement('div');d.className='tile big';d.innerHTML=SP(o);
+      d.onclick=()=>{if(s.dataset.d)return;s.dataset.d=1;const ok=o===ans;d.classList.add(ok?'ok':'no');if(ok)correct++;qi++;setProg(qi/qs.length);setTimeout(ask,800);};s.appendChild(d);});};
+  listen();
+};
+
+/* ---- реєстрація нових ігор ---- */
+GAMES_I18N.dict={uk:["Просторове орієнтування", "Графічний диктант", "Слухай Сову й веди лінію клітинками."],ru:["Пространственная ориентировка", "Графический диктант", "Слушай Сову и веди линию по клеточкам."],en:["Spatial orientation", "Grid dictation", "Listen to the Owl and draw along the squares."],pl:["Orientacja przestrzenna", "Dyktando graficzne", "Słuchaj Sowy i prowadź linię po kratkach."]};
+GAMES_I18N.maze={uk:["Планування", "Лабіринт", "Допоможи героєві знайти дорогу."],ru:["Планирование", "Лабиринт", "Помоги герою найти дорогу."],en:["Planning", "Maze", "Help the hero find the way."],pl:["Planowanie", "Labirynt", "Pomóż bohaterowi znaleźć drogę."]};
+GAMES_I18N.diff={uk:["Увага", "Знайди відмінності", "Чим відрізняються картинки?"],ru:["Внимание", "Найди отличия", "Чем отличаются картинки?"],en:["Attention", "Spot the difference", "What is different?"],pl:["Uwaga", "Znajdź różnice", "Czym różnią się obrazki?"]};
+GAMES_I18N.code={uk:["Увага", "Шифрування", "Розфарбуй фігури за зразком."],ru:["Внимание", "Шифровка", "Раскрась фигуры по образцу."],en:["Attention", "Colour code", "Colour the shapes using the key."],pl:["Uwaga", "Szyfr", "Pokoloruj figury według wzoru."]};
+GAMES_I18N.absurd={uk:["Мислення", "Що неправильно?", "Знайди нісенітниці на малюнку."],ru:["Мышление", "Что не так?", "Найди небылицы на картинке."],en:["Thinking", "What's wrong?", "Find the silly things in the picture."],pl:["Myślenie", "Co jest nie tak?", "Znajdź niedorzeczności na obrazku."]};
+GAMES_I18N.puzzle={uk:["Зорове сприймання", "Склади картинку", "Збери картинку з шматочків."],ru:["Зрительное восприятие", "Собери картинку", "Собери картинку из кусочков."],en:["Visual perception", "Picture puzzle", "Put the picture together."],pl:["Spostrzeganie wzrokowe", "Ułóż obrazek", "Złóż obrazek z kawałków."]};
+GAMES_I18N.count={uk:["Математика", "Рахуємо й порівнюємо", "Скільки? Де більше, де менше?"],ru:["Математика", "Считаем и сравниваем", "Сколько? Где больше, где меньше?"],en:["Maths", "Count and compare", "How many? Where are there more or fewer?"],pl:["Matematyka", "Liczymy i porównujemy", "Ile? Gdzie więcej, gdzie mniej?"]};
+GAMES_I18N.story={uk:["Слухове розуміння", "Слухаємо історію", "Послухай казочку й дай відповідь."],ru:["Понимание на слух", "Слушаем историю", "Послушай сказку и ответь."],en:["Listening", "Story time", "Listen to the story and answer."],pl:["Rozumienie ze słuchu", "Słuchamy historii", "Posłuchaj bajki i odpowiedz."]};
+Object.assign(META,{dict:{dom:'school',min:5,ic:'✏️'},maze:{dom:'thinking',min:4,ic:'🌀'},diff:{dom:'attention',min:3,ic:'🔎'},code:{dom:'attention',min:4,ic:'🎨'},absurd:{dom:'thinking',min:4,ic:'🤪'},puzzle:{dom:'perception',min:3,ic:'🖼️'},count:{dom:'school',min:3,ic:'🔢'},story:{dom:'memory',min:4,ic:'📖'}});
+Object.assign(VOICE_TXT,{"diff_intro": ["Знайди, чим нижня картинка відрізняється від верхньої.", "Найди, чем нижняя картинка отличается от верхней.", "Find what is different in the bottom picture.", "Znajdź, czym dolny obrazek różni się od górnego."], "absurd_intro": ["Що тут неправильно? Знайди й натисни.", "Что здесь неправильно? Найди и нажми.", "What's wrong here? Find it and tap.", "Co tu jest nie tak? Znajdź i naciśnij."], "puzzle_intro": ["Склади картинку. Натисни на два шматочки, щоб поміняти їх місцями.", "Собери картинку. Нажми на два кусочка, чтобы поменять их местами.", "Put the picture together. Tap two pieces to swap them.", "Ułóż obrazek. Naciśnij dwa kawałki, aby zamienić je miejscami."], "count_q": ["Скільки тут предметів?", "Сколько здесь предметов?", "How many are there?", "Ile tu jest przedmiotów?"], "more_q": ["Де предметів більше?", "Где предметов больше?", "Where are there more?", "Gdzie jest więcej?"], "less_q": ["Де предметів менше?", "Где предметов меньше?", "Where are there fewer?", "Gdzie jest mniej?"], "code_intro": ["Подивись на зразок і обери, якого кольору має бути фігура.", "Посмотри на образец и выбери, какого цвета должна быть фигура.", "Look at the key and choose the right colour for the shape.", "Spójrz na wzór i wybierz, jakiego koloru ma być figura."], "maze_intro": ["Допоможи героєві пройти лабіринтом. Натискай на клітинки поруч.", "Помоги герою пройти лабиринт. Нажимай на клеточки рядом.", "Help the hero through the maze. Tap the squares next to it.", "Pomóż bohaterowi przejść przez labirynt. Naciskaj sąsiednie kratki."], "dict_intro": ["Слухай Сову й натискай на потрібну клітинку.", "Слушай Сову и нажимай на нужную клеточку.", "Listen to the Owl and tap the right square.", "Słuchaj Sowy i naciskaj właściwą kratkę."], "st1": ["Їжачок пішов до лісу. Під деревом він знайшов гриб і поклав його в кошик. Дорогою додому їжачок зустрів білочку й подарував їй жолуді.", "Ёжик пошёл в лес. Под деревом он нашёл гриб и положил его в корзинку. По дороге домой ёжик встретил белочку и подарил ей жёлудь.", "The hedgehog went to the forest. Under a tree he found a mushroom and put it in his basket. On the way home the hedgehog met a squirrel and gave her an acorn.", "Jeżyk poszedł do lasu. Pod drzewem znalazł grzyba i włożył go do koszyka. W drodze do domu jeżyk spotkał wiewiórkę i dał jej żołądź."], "q1_1": ["Куди пішов їжачок?", "Куда пошёл ёжик?", "Where did the hedgehog go?", "Dokąd poszedł jeżyk?"], "q1_2": ["Що знайшов їжачок?", "Что нашёл ёжик?", "What did the hedgehog find?", "Co znalazł jeżyk?"], "q1_3": ["Кого зустрів їжачок?", "Кого встретил ёжик?", "Who did the hedgehog meet?", "Kogo spotkał jeżyk?"], "st2": ["Зайчик прийшов на город і висмикнув смачну морквинку. Потім він сів у човен і поплив річкою додому.", "Зайчик пришёл на огород и выдернул большую морковку. Потом он сел в лодку и поплыл по реке домой.", "The bunny came to the vegetable garden and pulled out a big carrot. Then he got into a boat and sailed home along the river.", "Zajączek przyszedł do ogródka i wyrwał dużą marchewkę. Potem wsiadł do łódki i popłynął rzeką do domu."], "q2_1": ["Куди прийшов зайчик?", "Куда пришёл зайчик?", "Where did the bunny go?", "Dokąd przyszedł zajączek?"], "q2_2": ["Що висмикнув зайчик?", "Что выдернул зайчик?", "What did the bunny pull out?", "Co wyrwał zajączek?"], "q2_3": ["На чому зайчик поплив додому?", "На чём зайчик поплыл домой?", "What did the bunny sail home in?", "Czym zajączek popłynął do domu?"], "st3": ["Настала зима. Мишка взяла санчата й каталася з гірки. Вона загубила рукавиці, а знайшов їх песик.", "Наступила зима. Мышка взяла санки и каталась с горки. Она потеряла варежки, а нашёл их пёсик.", "Winter came. The mouse took her sled and rode down the hill. She lost her mittens, and a puppy found them.", "Przyszła zima. Myszka wzięła sanki i zjeżdżała z górki. Zgubiła rękawiczki, a znalazł je piesek."], "q3_1": ["На чому каталася мишка?", "На чём каталась мышка?", "What did the mouse ride on?", "Na czym zjeżdżała myszka?"], "q3_2": ["Що загубила мишка?", "Что потеряла мышка?", "What did the mouse lose?", "Co zgubiła myszka?"], "q3_3": ["Хто знайшов рукавиці?", "Кто нашёл варежки?", "Who found the mittens?", "Kto znalazł rękawiczki?"], "st4": ["Слон і лев пішли на річку. Слон узяв м'ячик, а лев — кошик з бананами. Вони гралися, а потім з'їли всі банани.", "Слонёнок и львёнок пошли на речку. Слонёнок взял мячик, а львёнок — корзинку с бананами. Они играли, а потом съели все бананы.", "The little elephant and the little lion went to the river. The elephant took a ball, and the lion took a basket of bananas. They played, and then they ate all the bananas.", "Słoniątko i lwiątko poszły nad rzekę. Słoniątko wzięło piłkę, a lwiątko koszyk z bananami. Bawiły się, a potem zjadły wszystkie banany."], "q4_1": ["Куди пішли слон і лев?", "Куда пошли слонёнок и львёнок?", "Where did they go?", "Dokąd poszły słoniątko i lwiątko?"], "q4_2": ["Що взяв слон?", "Что взял слонёнок?", "What did the elephant take?", "Co wzięło słoniątko?"], "q4_3": ["Що було в кошику?", "Что было в корзинке?", "What was in the basket?", "Co było w koszyku?"], "d_1_r": ["Одна клітинка вправо.", "Одна клеточка вправо.", "One square to the right.", "Jedna kratka w prawo."], "d_1_l": ["Одна клітинка вліво.", "Одна клеточка влево.", "One square to the left.", "Jedna kratka w lewo."], "d_1_u": ["Одна клітинка вгору.", "Одна клеточка вверх.", "One square up.", "Jedna kratka w górę."], "d_1_d": ["Одна клітинка вниз.", "Одна клеточка вниз.", "One square down.", "Jedna kratka w dół."], "d_2_r": ["Дві клітинки вправо.", "Две клеточки вправо.", "Two squares to the right.", "Dwie kratki w prawo."], "d_2_l": ["Дві клітинки вліво.", "Две клеточки влево.", "Two squares to the left.", "Dwie kratki w lewo."], "d_2_u": ["Дві клітинки вгору.", "Две клеточки вверх.", "Two squares up.", "Dwie kratki w górę."], "d_2_d": ["Дві клітинки вниз.", "Две клеточки вниз.", "Two squares down.", "Dwie kratki w dół."], "d_3_r": ["Три клітинки вправо.", "Три клеточки вправо.", "Three squares to the right.", "Trzy kratki w prawo."], "d_3_l": ["Три клітинки вліво.", "Три клеточки влево.", "Three squares to the left.", "Trzy kratki w lewo."], "d_3_u": ["Три клітинки вгору.", "Три клеточки вверх.", "Three squares up.", "Trzy kratki w górę."], "d_3_d": ["Три клітинки вниз.", "Три клеточки вниз.", "Three squares down.", "Trzy kratki w dół."]});
 
 const _p=new URLSearchParams(location.search);
 if(_p.get('age'))AGE=Math.max(3,Math.min(6,+_p.get('age')));
