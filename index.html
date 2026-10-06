@@ -605,7 +605,7 @@ function genCode(){const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i
 /* URL веб-застосунку Google Apps Script (закінчується на /exec).
    Порожній рядок — дані нікуди не надсилаються, лишається лише CSV. */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxL-PDMPAZZzH8uVMhVGjRQlZIs3n8DuUdUkxi6p_ZZDdsEMkaIOOi_UyXIpXTk5t73/exec";
-const APP_VERSION = "2026-10-05b";
+const APP_VERSION = "2026-10-07";
 const TRIAL_TIMEOUT_MS = 35000;      /* бездіяльність на пробі → проба фіксується як пропущена */
 const MEM_TIMEOUT_MS   = 70000;      /* «Запам'ятай»: довше, бо дитина обирає кілька картинок */
 
@@ -943,47 +943,84 @@ const CORSI_POS=[[18,22],[52,14],[80,26],[30,50],[62,46],[86,60],[22,78],[50,82]
 function bunny(){return `<img src="${BUNNY_IMG}" style="width:100%;height:100%;object-fit:contain;display:block" draggable="false" alt="зайчик"/>`;}
 function blockCorsi(){
   const startLen = (S.ageYears<=4)?2:3;
-  corsiRun(startLen, 0, [], 0);
+  S._corsiFirst = true;
+  corsiPractice(0, ()=>corsiRun(startLen, 0, [], 0));
+}
+/* Тренувальна проба (2 стрибки, не оцінюється): показуємо, як грати; за помилки — ще один показ */
+const CORSI_PRACTICE=[2,6];
+function _corsiBoard(title, sub){
+  app.innerHTML=`<div class="screen"><h2>${title}</h2>
+    <p class="big" id="corsiHint">${sub}</p>
+    <div style="position:relative;width:100%;max-width:360px;aspect-ratio:1/1;margin:0 auto;background:#3a4a63;border-radius:20px" id="board">${corsiLayout()}</div></div>`;
+  return [...document.querySelectorAll(".corsi-dot")];
+}
+/* Показ послідовності: зайчик на кружечку 700 мс + пауза 300 мс = 1 с на позицію (як у класичній процедурі) */
+function _corsiShow(dots, seq, done){
+  let k=0;
+  const step=()=>{
+    if(k>=seq.length){ dots.forEach(d=>{d.innerHTML="";d.style.background="#e2ddcf";d.style.transform="translate(-50%,-50%)";}); return done(); }
+    const d=dots[seq[k]]; d.style.background="#f4f2ec"; d.innerHTML=bunny(); d.style.transform="translate(-50%,-50%) scale(1.15)";
+    setTimeout(()=>{ d.innerHTML=""; d.style.background="#e2ddcf"; d.style.transform="translate(-50%,-50%)"; k++; setTimeout(step,300); },700);
+  };
+  step();
+}
+/* Чекаємо завершення озвучки (але не довше 8 с), потім невелика пауза */
+function _afterSay(p, ms, fn){ let fired=false; const go=()=>{ if(fired) return; fired=true; setTimeout(fn, ms); };
+  Promise.resolve(p).then(go, go); setTimeout(go, 8000); }
+function _corsiYourTurn(){ const h=document.getElementById("corsiHint"); if(h) h.textContent=LL("Тепер твоя черга!","Теперь твоя очередь!","Now it's your turn!","Teraz twoja kolej!");
+  say(LL("Тепер твоя черга!","Теперь твоя очередь!","Now it's your turn!","Teraz twoja kolej!")); }
+/* Обробник дотиків з ігноруванням миттєвого повторного дотику до того самого кружечка */
+function _corsiTaps(dots, onTap){ let last=-1, lastT=0;
+  dots.forEach(d=>d.onclick=()=>{ const i=+d.dataset.i, now=Date.now(); if(i===last && now-lastT<450) return; last=i; lastT=now;
+    d.style.background="#8a92b8"; setTimeout(()=>d.style.background="#e2ddcf",200); onTap(i); }); }
+function corsiPractice(attempt, next){
+  const dots=_corsiBoard(LL("Гра «Стежинка»","Игра «Тропинка»","Game \"The Path\"","Gra «Ścieżka»"), LL("Спочатку потренуємося!","Сначала потренируемся!","Let's practice first!","Najpierw poćwiczmy!"));
+  const p = attempt===0
+    ? sayParts([LL("Спочатку потренуємося!","Сначала потренируемся!","Let's practice first!","Najpierw poćwiczmy!"), LL("Дивись уважно, куди стрибає зайчик, а потім повтори","Смотри внимательно, куда прыгает зайка, потом повтори","Watch carefully where the bunny hops, then repeat")])
+    : say(LL("Подивись ще раз.","Посмотри ещё раз.","Watch once more.","Popatrz jeszcze raz."));
+  _afterSay(p, 500, ()=>_corsiShow(dots, CORSI_PRACTICE, ()=>{
+    _corsiYourTurn(); const input=[]; const t0=Date.now();
+    trialStart(()=>{ log("corsi","practice",null,Date.now()-t0,{seq:CORSI_PRACTICE.join(","),input:input.join(","),scored:0,practice:1,skipped:1}); finishPractice(false); });
+    _corsiTaps(dots, i=>{ if(_trialDone) return; input.push(i); if(input.length<CORSI_PRACTICE.length){ trialStart(()=>{ log("corsi","practice",null,Date.now()-t0,{seq:CORSI_PRACTICE.join(","),input:input.join(","),scored:0,practice:1,skipped:1}); finishPractice(false); }); return; }
+      trialStop(); const ok=input.every((v,x)=>v===CORSI_PRACTICE[x]);
+      log("corsi","practice",ok?1:0,Date.now()-t0,{seq:CORSI_PRACTICE.join(","),input:input.join(","),scored:0,practice:1,attempt:attempt+1});
+      finishPractice(ok); });
+  }));
+  function finishPractice(ok){
+    dots.forEach(d=>d.onclick=null);
+    if(!ok && attempt===0) return setTimeout(()=>corsiPractice(1, next), 400);
+    const msg = ok ? LL("Молодець! Так і треба.","Молодец! Так и нужно.","Well done! That's right.","Brawo! Tak trzeba.") : LL("А тепер по-справжньому!","А теперь по-настоящему!","Now for real!","A teraz naprawdę!");
+    const p2 = ok ? sayParts([msg, LL("А тепер по-справжньому!","А теперь по-настоящему!","Now for real!","A teraz naprawdę!")]) : say(msg);
+    const h=document.getElementById("corsiHint"); if(h) h.textContent=msg;
+    _afterSay(p2, 300, next);
+  }
 }
 function corsiLayout(){
   return CORSI_POS.map((p,i)=>`<div class="corsi-dot" data-i="${i}" style="position:absolute;left:${p[0]}%;top:${p[1]}%;transform:translate(-50%,-50%);width:16%;aspect-ratio:1/1;border-radius:50%;background:#e2ddcf;box-shadow:0 3px 8px rgba(0,0,0,.25);cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden"></div>`).join("");
 }
 function corsiRun(len, failsAtLen, maxOk, prevSpan){
   const seq=((CORSI_FORMS[S.form||"A"][len]||[])[failsAtLen]||[]).slice();   /* фіксована послідовність форми А/Б */
-  app.innerHTML=`<div class="screen"><h2>${LL("Гра «Стежинка»","Игра «Тропинка»","Game \"The Path\"")}</h2>
-    <p class="big">${LL("Дивись, куди стрибає зайчик!","Смотри, куда прыгает зайка!","Watch where the bunny hops!")}</p>
-    <div style="position:relative;width:100%;max-width:360px;aspect-ratio:1/1;margin:0 auto;background:#3a4a63;border-radius:20px" id="board">${corsiLayout()}</div></div>`;
-  say(LL("Дивись уважно, куди стрибає зайчик, а потім повтори","Смотри внимательно, куда прыгает зайка, потом повтори","Watch carefully where the bunny hops, then repeat"));
-  const dots=[...document.querySelectorAll(".corsi-dot")];
-  // play sequence
-  let k=0;
-  const flash=()=>{
-    if(k>0){dots[seq[k-1]].style.background="#e2ddcf";dots[seq[k-1]].innerHTML="";}
-    if(k<seq.length){const d=dots[seq[k]];d.style.background="#f4f2ec";d.innerHTML=bunny();d.style.transform="translate(-50%,-50%) scale(1.15)";
-      setTimeout(()=>{d.style.transform="translate(-50%,-50%)";},350);k++;setTimeout(flash,550);}
-    else{
-      /* Прибираємо зайчика з УСІХ кружечків і скидаємо вигляд, щоб останній теж натискався */
-      dots.forEach(d=>{d.innerHTML="";d.style.background="#e2ddcf";d.style.transform="translate(-50%,-50%)";});
-      corsiInput(seq,len,failsAtLen,maxOk,prevSpan,dots);
-    }
-  };
-  setTimeout(flash,500);
+  const dots=_corsiBoard(LL("Гра «Стежинка»","Игра «Тропинка»","Game \"The Path\""), LL("Дивись, куди стрибає зайчик!","Смотри, куда прыгает зайка!","Watch where the bunny hops!"));
+  /* Інструкцію повністю — лише перед першою оцінюваною пробою; далі коротке «Дивись уважно!». Показ починається ПІСЛЯ озвучки. */
+  const p = S._corsiFirst ? say(LL("Дивись уважно, куди стрибає зайчик, а потім повтори","Смотри внимательно, куда прыгает зайка, потом повтори","Watch carefully where the bunny hops, then repeat"))
+                          : say(LL("Дивись уважно!","Смотри внимательно!","Watch carefully!","Patrz uważnie!"));
+  S._corsiFirst = false;
+  _afterSay(p, 600, ()=>_corsiShow(dots, seq, ()=>{ _corsiYourTurn(); corsiInput(seq,len,failsAtLen,maxOk,prevSpan,dots); }));
 }
 function corsiInput(seq,len,failsAtLen,maxOk,prevSpan,dots){
   const input=[];const t0=Date.now();
   const onTimeout=()=>{ dots.forEach(d=>d.onclick=null);
-    log("corsi","len"+len,null,Date.now()-t0,{seq:seq.join(""),input:input.join(""),length:len,attempt:failsAtLen+1,skipped:1});
+    log("corsi","len"+len,null,Date.now()-t0,{seq:seq.join(","),input:input.join(","),length:len,attempt:failsAtLen+1,skipped:1});
     if(failsAtLen>=1){S._corsiSpan=prevSpan;return reward(blockMemory);} corsiRun(len,failsAtLen+1,maxOk,prevSpan); };
   trialStart(onTimeout);
-  dots.forEach(d=>d.onclick=()=>{
+  _corsiTaps(dots, i=>{
     if(_trialDone)return;
-    const i=+d.dataset.i;input.push(i);
+    input.push(i);
     if(input.length<seq.length) trialStart(onTimeout);   /* кожен дотик перезапускає відлік */
     else trialStop();
-    d.style.background="#8a92b8";setTimeout(()=>d.style.background="#e2ddcf",200);
-    if(input.length===seq.length){
+    if(input.length===seq.length){ dots.forEach(x=>x.onclick=null);
       const ok=input.every((v,x)=>v===seq[x]);
-      log("corsi","len"+len,ok?1:0,Date.now()-t0,{seq:seq.join(""),input:input.join(""),length:len,attempt:failsAtLen+1});
+      log("corsi","len"+len,ok?1:0,Date.now()-t0,{seq:seq.join(","),input:input.join(","),length:len,attempt:failsAtLen+1});
       const span=ok?len:prevSpan;
       if(ok){ if(len>=Math.min(7,3+(S.ageYears||5)-2)){S._corsiSpan=len;return reward(blockMemory);} corsiRun(len+1,0,maxOk,len);}
       else{ if(failsAtLen>=1){S._corsiSpan=prevSpan;return reward(blockMemory);} corsiRun(len,failsAtLen+1,maxOk,prevSpan);}
@@ -1217,8 +1254,18 @@ const CATS_BANK=[
   ["doll","pyramid","ball","spoon"],       /* іграшки (варіант) */
   ["raincoat","boots","umbrella","key"],   /* від дощу */
   ["cock","hen","duckling","kitten"],      /* птахи двору */
-  ["duckling","gosling","chicken","fox"]   /* пташенята */
+  ["duckling","gosling","chicken","fox"],  /* пташенята */
+  /* --- складніші, понятійні категорії (лише старший режим) --- */
+  ["plane","butterfly","bird","ship"],      /* 24: літає */
+  ["dragonfly","bird","plane","car"],       /* 25: літає (варіант) */
+  ["ship","ofishey","duckling","car"],      /* 26: плаває */
+  ["ship","ofishey","gosling","plane"],     /* 27: плаває (варіант) */
+  ["kitten","chicken","gosling","cow"],     /* 28: дитинчата */
+  ["kitten","duckling","chicken","horse"],  /* 29: дитинчата (варіант) */
+  ["dog","tree","flower","doll"],           /* 30: живе / неживе */
+  ["horse","flower","tree","teapot"]        /* 31: живе / неживе (варіант) */
 ];
+const CATS_HARD_PAIRS=[[24,25],[26,27],[28,29],[30,31]];
 /* Скільки наборів показуємо за прохід */
 const CATS_N=12;
 function blockThinking(){odd(0);}
@@ -1228,7 +1275,7 @@ function blockThinking(){odd(0);}
    Правило зупинки: три помилки поспіль — решта проб не пред'являється і зараховується як невиконана. */
 const CATS_FORM_PAIRS=[[0,1],[7,8],[9,10],[5,6],[11,12],[3,4],[15,16],[17,18],[13,14],[19,20],[2,21],[22,23]];
 const STOP_AFTER_ERRORS=3;
-function _buildCats(){ const run=CATS_FORM_PAIRS.map(p=>CATS_BANK[S.form==="B"?p[1]:p[0]]);
+function _buildCats(){ const pairs=(S.ageMode==="full")?CATS_FORM_PAIRS.concat(CATS_HARD_PAIRS):CATS_FORM_PAIRS; const run=pairs.map(p=>CATS_BANK[S.form==="B"?p[1]:p[0]]);
   const catch_=S.form==="B"?["ball","ball","ball","kitten"]:["apple","apple","apple","car"]; catch_.catch=true;   /* контрольна проба: три однакові + один інший */
   run.splice(2,0,catch_); S._catsRun=run; S._oddErr=0; }
 function _oddFail(i){ S._oddErr=(S._oddErr||0)+1; if(S._oddErr>=STOP_AFTER_ERRORS){ S._oddStop=i+1; log("thinking","odd_stop",null,0,{scored:0,stopped_after:i+1}); return true; } return false; }
@@ -1373,7 +1420,7 @@ function lineArtOverlay(keys){
 
 const NOISY_STYLE=["straight","wavy","loops","straight","wavy","loops","straight","wavy"];
 /* Рівень зашумлення зростає від проби до проби (частка від базової щільності ліній) */
-const NOISE_LEVEL=[0.45,0.45,0.7,0.7,1.0,1.0,1.3,1.3];
+const NOISE_LEVEL=[0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0];   /* з 2026-10-07: вищі рівні для старших проб (пілот: ефект стелі) */
 /* Пул ч/б контурів для «Вгадай» (усі мають LINEART) */
 const SEE_POOL=["apple", "cat", "tree", "key", "umbrella", "flower", "cup", "mushroom", "house", "boat", "fish", "chick", "car", "carrot", "butterfly", "ball", "dog", "rabbit", "bear", "hedgehog", "sparrow", "leaf", "sun", "cloud", "pear2", "banana2", "grapes2", "tomato2", "teapot2", "spoon2", "star", "balloon", "glasses", "bucket", "plane2", "bicycle"];
 function _buildSee(){
@@ -1399,7 +1446,7 @@ function noisy(i){const NOISY=S._noisyRun||SEE_POOL.slice(0,8);if(i>=9)return ov
  trialStart(()=>{log("perception",iid,null,TRIAL_TIMEOUT_MS,Object.assign({correct_item:target,noise_style:style,noise_level:level,skipped:1},isCatch?{scored:0,catch:1}:{}));if(isCatch)return noisy(i+1);S._seeErr=(S._seeErr||0)+1;if(S._seeErr>=STOP_AFTER_ERRORS){log("perception","noisy_stop",null,0,{scored:0,stopped_after:idx+1});return overlay(0);}noisy(i+1);});
  say(t("seeAskNoisy"));setProg(.66+i*.03);}
 const OVL=[["cup","fish","key"],["tree","mushroom","flower"],["car","boat","ball"]];
-function overlay(i){const OVL=S._ovlRun||[["cup","fish","key"],["tree","mushroom","flower"],["car","boat","ball"]];if(i>=OVL.length)return finishChild();const comp=OVL[i],t0=Date.now();const correct=comp.slice().sort().join("+");const _or=_rng("overlay-opts-"+i);const wrongs=[];while(wrongs.length<3){const w=ssample(KEYS,3,[],_or).sort().join("+");if(w!==correct&&!wrongs.includes(w))wrongs.push(w);}const opts=sshuffle([correct,...wrongs],_or);
+function overlay(i){const OVL=S._ovlRun||[["cup","fish","key"],["tree","mushroom","flower"],["car","boat","ball"]];if(i>=OVL.length)return finishChild();const comp=OVL[i],t0=Date.now();const correct=comp.slice().sort().join("+");const _or=_rng("overlay-opts-"+i);const wrongs=[];let _g=0;while(wrongs.length<3&&_g++<200){const pos=wrongs.length%comp.length;const rep_=ssample(KEYS.filter(k=>!comp.includes(k)),1,[],_or)[0];const w=comp.map((k,x)=>x===pos?rep_:k).sort().join("+");if(w!==correct&&!wrongs.includes(w))wrongs.push(w);}   /* хибний набір = правильний із заміною одного предмета: треба впізнати ВСІ три */const opts=sshuffle([correct,...wrongs],_or);
  const allLineArt = comp.every(k=>LINEART[k]);
  const stimHtml = allLineArt ? lineArtOverlay(comp) : card(drawOverlay(comp));
  app.innerHTML=`<div class="screen seescreen"><h2>${t("seeTitle")}</h2><p class="big">${t("seeAskOverlay")}</p><div class="stimwrap">${stimHtml}</div><hr class="taskdiv"><p class="big" style="font-size:15px;opacity:.85;margin:0 0 8px">${LL("Обери набір внизу","Выбери набор внизу","Choose the set below")}</p><div class="options" id="o" style="grid-template-columns:repeat(2,1fr);max-width:520px"></div></div>`;
@@ -1583,7 +1630,7 @@ function scoreChild(){
  const memN=Math.max(0,Math.min(1,(mem.correct||0)/(mem.span||6)));
  /* Плановані обсяги: мислення 12 «що зайве» + 3 ряди, сприймання 8 зашумлених + 3 накладення.
     Непред'явлені після зупинки проби зараховуються як невиконані. */
- const TH_PLANNED=15, PE_PLANNED=11;
+ const TH_PLANNED=(S.ageMode==="full")?19:15, PE_PLANNED=11;   /* старший режим: 16 «що зайве» + 3 ряди */
  const thN=thC/TH_PLANNED, peN=peC/PE_PLANNED;
  const gg=by("gonogo"), ggGo=gg.filter(x=>x.go===1), ggNo=gg.filter(x=>x.go===0);
  const ggHits=ggGo.filter(x=>x.correct===1).length, ggCR=ggNo.filter(x=>x.correct===1).length;

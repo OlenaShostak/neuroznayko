@@ -72,7 +72,13 @@
    "de2ef28a": "лялька",
    "33d16d71": "кубики",
    "663e3c75": "чобітки",
-   "f021371a": "Натисни на картинки в тому самому порядку"
+   "f021371a": "Натисни на картинки в тому самому порядку",
+   "c6fef7b8": "Спочатку потренуємося!",
+   "cfe4cf5f": "Тепер твоя черга!",
+   "35c6b980": "Подивись ще раз.",
+   "f3fc3bcb": "А тепер по-справжньому!",
+   "8bcdbb89": "Дивись уважно!",
+   "875de1ca": "Молодець! Так і треба."
   },
   "ru": {
    "fd9b733e": "Привет! Я — Мудрая Сова. Хочешь отправиться в приключение вместе со мной и поиграть в несколько интересных игр? Если устанешь — просто скажи взрослому, и мы остановимся.",
@@ -145,7 +151,13 @@
    "dddef373": "кукла",
    "33d16d71": "кубики",
    "5191cbeb": "сапожки",
-   "9bcc42be": "Нажми на картинки в том же порядке"
+   "9bcc42be": "Нажми на картинки в том же порядке",
+   "6f61c655": "Сначала потренируемся!",
+   "1fd4500d": "Теперь твоя очередь!",
+   "368b42c1": "Посмотри ещё раз.",
+   "a445de65": "А теперь по-настоящему!",
+   "be3e229d": "Смотри внимательно!",
+   "77890175": "Молодец! Так и нужно."
   },
   "en": {
    "db89716e": "Hi! I'm the Wise Owl. Want to go on an adventure with me and play a few fun games? If you get tired, just tell a grown-up and we'll stop.",
@@ -215,7 +227,13 @@
    "4a9c9bdf": "table",
    "19ed5bcc": "doll",
    "160da1c3": "blocks",
-   "fffa7852": "boots"
+   "fffa7852": "boots",
+   "300e6ba6": "Let's practice first!",
+   "e50c62fb": "Now it's your turn!",
+   "cb454320": "Watch once more.",
+   "7e833207": "Now for real!",
+   "ad76061e": "Watch carefully!",
+   "27373b2b": "Well done! That's right."
   },
   "pl": {
    "83ddea20": "Cześć! Jestem Mądra Sowa. Chcesz wyruszyć ze mną na przygodę i zagrać w kilka ciekawych gier? Jeśli się zmęczysz — po prostu powiedz dorosłemu, a zrobimy przerwę.",
@@ -287,7 +305,13 @@
    "4d36f264": "łóżko",
    "b1e99a72": "lalka",
    "65b957a4": "klocki",
-   "64ff3eaf": "buty"
+   "64ff3eaf": "buty",
+   "244a2e69": "Najpierw poćwiczmy!",
+   "886fee48": "Teraz twoja kolej!",
+   "8bd26b0a": "Popatrz jeszcze raz.",
+   "79d5bef7": "A teraz naprawdę!",
+   "1379166c": "Patrz uważnie!",
+   "2e4b2355": "Brawo! Tak trzeba."
   }
  },
  "bank": {
