@@ -332,6 +332,7 @@ function sysVoice(key){try{const txt=(VOICE_TXT[key]||[])[['uk','ru','en','pl'].
   const vs=(speechSynthesis.getVoices()||[]).filter(v=>v.lang.toLowerCase().startsWith(code));
   const rank=v=>(/natural|neural|online|premium|enhanced|siri|google/i.test(v.name)?10:0)+(v.localService?0:2);
   vs.sort((a,b)=>rank(b)-rank(a));
+  if(!vs.length)return;   /* немає системного голосу цієї мови — краще мовчати, ніж читати чужим (напр. російським) голосом */
   const u=new SpeechSynthesisUtterance(txt);if(vs[0])u.voice=vs[0];u.lang=vs[0]?vs[0].lang:({uk:'uk-UA',ru:'ru-RU',en:'en-US',pl:'pl-PL'}[LANG]);
   u.rate=.95;u.pitch=1.05;speechSynthesis.speak(u);}catch(e){}}
 try{speechSynthesis.onvoiceschanged=()=>{};}catch(e){}
