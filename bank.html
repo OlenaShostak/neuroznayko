@@ -608,6 +608,8 @@ const META={
  shadow:{dom:'perception',min:3,ic:'🌑'}, half:{dom:'perception',min:3,ic:'🪞'}, path:{dom:'perception',min:3,ic:'🛤️'},
  sound:{dom:'school',min:5,ic:'🔤'}, syll:{dom:'school',min:5,ic:'🥁'},
 };
+let PICK=[];           /* добірка на тиждень зі звіту скринінгу (?pick=frog,hide,order) */
+const PICK_T={uk:'🎁 Добірка на цей тиждень — 3 гри для вашої дитини',ru:'🎁 Подборка на эту неделю — 3 игры для вашего ребёнка',en:'🎁 This week’s set — 3 games for your child',pl:'🎁 Zestaw na ten tydzień — 3 gry dla Twojego dziecka'};
 let REC=[];            /* рекомендовані області з посилання скринінгу (?domain=memory,thinking) */
 let LV=5;              /* поточний рівень гри: вік ± адаптивна поправка (зона найближчого розвитку) */
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}}
@@ -665,7 +667,9 @@ function menu(){
   curGame=null;setProg(0);stopVoice();
   const ok=k=>AGE>=META[k].min;
   let html='';
-  const recKeys=Object.keys(META).filter(k=>ok(k)&&REC.includes(META[k].dom));
+  const pk=PICK.filter(k=>META[k]&&ok(k));
+  if(pk.length) html+=`<div class="area rec">${PICK_T[LANG]||PICK_T.uk}</div>`+pk.map(gameCard).join('');
+  const recKeys=Object.keys(META).filter(k=>ok(k)&&REC.includes(META[k].dom)&&!pk.includes(k));
   if(recKeys.length) html+=`<div class="area rec">${L().rec}</div>`+recKeys.map(gameCard).join('');
   DOMS.forEach(d=>{const ks=Object.keys(META).filter(k=>ok(k)&&META[k].dom===d);
     if(ks.length) html+=`<div class="area">${L().DOM[d]}</div>`+ks.map(gameCard).join('');});
@@ -1563,6 +1567,9 @@ const _p=new URLSearchParams(location.search);
 if(_p.get('age'))AGE=Math.max(3,Math.min(6,+_p.get('age')));
 if(_p.get('lang')&&LANGS[_p.get('lang')])LANG=_p.get('lang');
 if(_p.get('domain'))REC=_p.get('domain').split(',').filter(d=>DOMS.includes(d));
+/* Добірка на тиждень: зберігається на пристрої 8 днів, щоб не зникала при наступному відкритті Банку */
+if(_p.get('pick')){PICK=_p.get('pick').split(',').filter(k=>META[k]).slice(0,3);lsSet('owl_pick',{k:PICK,t:Date.now()});}
+else{const sp=lsGet('owl_pick',null);if(sp&&Array.isArray(sp.k)&&Date.now()-sp.t<8*864e5)PICK=sp.k.filter(k=>META[k]);}
 document.documentElement.lang=LANG;document.title=L().title;
 /* Посилання зі звіту скринінгу (?lang=…&age=…&domain=…) відкриває одразу меню ігор */
 if(_p.get('lang')&&_p.get('age'))menu();else splash();

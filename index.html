@@ -1940,7 +1940,37 @@ function bankLink(){
        doms=[...new Set(pr.bands.filter(b=>b.band!=="green").map(b=>({inhibition:"attention",verbalmem:"memory"})[b.key]||b.key))];
        if(pr.readinessBand && pr.readinessBand!=="green") doms.push("school");
   }catch(e){}
-  return BANK_URL + "?lang=" + lang + "&age=" + age + (doms.length ? "&domain=" + doms.join(",") : "");
+  const pick = weekPick().map(x=>x.k);
+  return BANK_URL + "?lang=" + lang + "&age=" + age + (doms.length ? "&domain=" + doms.join(",") : "") + (pick.length ? "&pick=" + pick.join(",") : "");
+}
+/* ===== Добірка на тиждень: 2 гри на те, що варто підтримати, 1 — на сильну сторону ===== */
+const BANK_CAT = {"firefly": {"m": 3, "i": "✨", "t": ["Світлячки в темряві", "Светлячки в темноте", "Fireflies in the dark", "Świetliki w ciemności"]}, "request": {"m": 4, "i": "👂", "t": ["Прохання Сови", "Просьба Совы", "Owl's request", "Prośba Sowy"]}, "suitcase": {"m": 4, "i": "🧳", "t": ["Валіза Сови", "Чемодан Совы", "Owl's suitcase", "Walizka Sowy"]}, "hide": {"m": 3, "i": "🐾", "t": ["Хто де сховався", "Кто где спрятался", "Who's hiding where", "Kto gdzie się schował"]}, "gone": {"m": 3, "i": "🔍", "t": ["Чого не стало", "Чего не стало", "What's missing", "Czego brakuje"]}, "pairs": {"m": 3, "i": "🃏", "t": ["Парочки", "Парочки", "Pairs", "Pary"]}, "chameleon": {"m": 3, "i": "🦎", "t": ["Хамелеон", "Хамелеон", "Chameleon", "Kameleon"]}, "light": {"m": 3, "i": "🚦", "t": ["Світлофор", "Светофор", "Traffic light", "Światła"]}, "daynight": {"m": 4, "i": "🌓", "t": ["День і ніч", "День и ночь", "Day and night", "Dzień i noc"]}, "frog": {"m": 3, "i": "🐸", "t": ["Впіймай лише жабку", "Поймай только лягушку", "Catch only the frog", "Złap tylko żabkę"]}, "cross": {"m": 4, "i": "⭕", "t": ["Закресли кружечки", "Зачеркни кружочки", "Cross out the circles", "Skreśl kółka"]}, "order": {"m": 3, "i": "🌱", "t": ["Що спочатку, що потім", "Что сначала, что потом", "What comes first", "Co najpierw, co potem"]}, "match": {"m": 3, "i": "🧩", "t": ["Логічні парочки", "Логические парочки", "Logical pairs", "Logiczne pary"]}, "beads": {"m": 3, "i": "📿", "t": ["Продовж намисто", "Продолжи бусы", "Finish the necklace", "Dokończ korale"]}, "shadow": {"m": 3, "i": "🌑", "t": ["Тінь предмета", "Тень предмета", "Shadows", "Cień przedmiotu"]}, "half": {"m": 3, "i": "🪞", "t": ["Впізнай половинку", "Узнай половинку", "Guess the half", "Rozpoznaj połówkę"]}, "path": {"m": 3, "i": "🛤️", "t": ["Доріжка", "Дорожка", "Follow the path", "Ścieżka"]}, "sound": {"m": 5, "i": "🔤", "t": ["Перший звук", "Первый звук", "First sound", "Pierwsza głoska"]}, "syll": {"m": 5, "i": "🥁", "t": ["Плескаємо склади", "Хлопаем слоги", "Clap the syllables", "Wyklaskujemy sylaby"]}, "dict": {"m": 5, "i": "✏️", "t": ["Графічний диктант", "Графический диктант", "Grid dictation", "Dyktando graficzne"]}, "maze": {"m": 4, "i": "🌀", "t": ["Лабіринт", "Лабиринт", "Maze", "Labirynt"]}, "diff": {"m": 3, "i": "🔎", "t": ["Знайди відмінності", "Найди отличия", "Spot the difference", "Znajdź różnice"]}, "code": {"m": 4, "i": "🎨", "t": ["Шифрування", "Шифровка", "Colour code", "Szyfr"]}, "absurd": {"m": 4, "i": "🤪", "t": ["Що неправильно?", "Что не так?", "What's wrong?", "Co jest nie tak?"]}, "puzzle": {"m": 3, "i": "🖼️", "t": ["Склади картинку", "Собери картинку", "Picture puzzle", "Ułóż obrazek"]}, "count": {"m": 3, "i": "🔢", "t": ["Рахуємо й порівнюємо", "Считаем и сравниваем", "Count and compare", "Liczymy i porównujemy"]}, "story": {"m": 4, "i": "📖", "t": ["Слухаємо історію", "Слушаем историю", "Story time", "Słuchamy historii"]}};
+const BANK_FOR = {workingmem:["firefly","request","suitcase"],memory:["hide","gone","pairs","story"],verbalmem:["request","suitcase","story"],
+  flexibility:["chameleon","daynight","light"],inhibition:["light","frog","daynight"],attention:["diff","cross","code","frog"],
+  thinking:["order","match","beads","maze","absurd"],perception:["shadow","half","puzzle","path"]};
+const BANK_DOMN = {workingmem:["робоча пам'ять","рабочая память","working memory","pamięć robocza"],memory:["зорова пам'ять","зрительная память","visual memory","pamięć wzrokowa"],
+  verbalmem:["слухова пам'ять","слуховая память","listening memory","pamięć słuchowa"],flexibility:["гнучкість","гибкость","flexibility","elastyczność"],
+  inhibition:["самоконтроль","самоконтроль","self-control","samokontrola"],attention:["увага","внимание","attention","uwaga"],
+  thinking:["мислення","мышление","thinking","myślenie"],perception:["сприймання","восприятие","perception","spostrzeganie"]};
+function _li(){ return {uk:0,ru:1,en:2,pl:3}[lang]||0; }
+function weekPick(){
+  const age = (S.ageYears||5); let pr; try{ pr=buildProfile(); }catch(e){ return []; }
+  const seed = String(S.id||"").split("").reduce((a,c)=>a+c.charCodeAt(0),0);
+  const arr = pr.bands.slice().sort((a,b)=>a.value-b.value), used = new Set(), out = [];
+  const take = (key,why)=>{ const g=(BANK_FOR[key]||[]).filter(k=>BANK_CAT[k]&&age>=BANK_CAT[k].m&&!used.has(k));
+    if(!g.length) return false; const k=g[seed%g.length]; used.add(k); out.push({k,key,why}); return true; };
+  for(const b of arr){ if(out.length>=2) break; take(b.key,"support"); }
+  for(const b of arr.slice().reverse()){ if(take(b.key,"strong")) break; }
+  return out;
+}
+function weekPickHtml(locked){
+  const li=_li(), p=weekPick(); if(!p.length) return "";
+  return `<div style="display:flex;flex-direction:column;gap:8px;margin:10px 0">`+p.map(x=>{ const g=BANK_CAT[x.k];
+    const why = x.why==="strong" ? LL("сильна сторона","сильная сторона","a strength","mocna strona") : LL("варто підтримати","стоит поддержать","worth supporting","warto wspierać");
+    return `<div style="display:flex;align-items:center;gap:12px;text-align:left;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,${locked?".07":".14"});${locked?"opacity:.8":""}">
+      <span style="font-size:26px;line-height:1">${g.i}</span>
+      <span style="flex:1"><b>${g.t[li]}</b><br><span style="font-size:12.5px;opacity:.85">${why}: ${BANK_DOMN[x.key][li]}</span></span>
+      ${locked?'<span style="font-size:18px">🔒</span>':''}</div>`; }).join("")+`</div>`;
 }
 function step2Open(){ return (S.runNo||0) >= 2 || S.runType==="retest"; }
 function openBank(){
@@ -1962,16 +1992,22 @@ function openChecklist(){
 }
 function step2Html(){
   if(step2Open()){
-    return `<div style="margin:14px auto 4px;max-width:520px;padding:12px 14px;border-radius:14px;background:rgba(107,143,78,.18);text-align:center">
-      <div style="font-weight:800;margin-bottom:8px">🎉 ${LL("Крок 2 відкрито! Дякуємо за повторне проходження.","Шаг 2 открыт! Спасибо за повторное прохождение.","Step 2 unlocked! Thank you for the repeat session.")}</div>
-      <button class="ghost" onclick="openBank()">🎲 ${LL("Банк ігор Мудрої Сови (для занять удома)","Банк игр Мудрой Совы (для занятий дома)","Wise Owl Games Bank (for play at home)")}</button>
+    return `<div style="margin:14px auto 4px;max-width:520px;padding:14px;border-radius:14px;background:rgba(107,143,78,.18);text-align:center;color:#fff">
+      <div style="font-weight:800;margin-bottom:4px">🎉 ${LL("Крок 2 відкрито! Дякуємо за повторне проходження.","Шаг 2 открыт! Спасибо за повторное прохождение.","Step 2 unlocked! Thank you for the repeat session.")}</div>
+      <div style="font-weight:800;font-size:17px;margin-top:8px">🎁 ${LL("Добірка на цей тиждень: 3 гри для вашої дитини","Подборка на эту неделю: 3 игры для вашего ребёнка","This week’s set: 3 games for your child","Zestaw na ten tydzień: 3 gry dla Twojego dziecka")}</div>
+      <div style="font-size:13px;opacity:.9;margin-top:4px;line-height:1.4">${LL("Дві гри — на те, що варто підтримати, одна — на сильну сторону, для задоволення. Досить 10 хвилин на день.","Две игры — на то, что стоит поддержать, одна — на сильную сторону, для удовольствия. Достаточно 10 минут в день.","Two games for what is worth supporting and one for a strength, just for fun. Ten minutes a day is enough.","Dwie gry na to, co warto wspierać, i jedna na mocną stronę, dla przyjemności. Wystarczy 10 minut dziennie.")}</div>
+      ${weekPickHtml(false)}
+      <button class="btn" onclick="openBank()">▶ ${LL("Відкрити добірку в Банку ігор","Открыть подборку в Банке игр","Open the set in the Games Bank","Otwórz zestaw w Banku gier")}</button>
+      <div style="font-size:12.5px;opacity:.85;margin:6px 0 8px">${LL("У Банку ігор Мудрої Сови є ще понад 20 ігор та ігри без екрана.","В Банке игр Мудрой Совы есть ещё больше 20 игр и игры без экрана.","The Wise Owl Games Bank has 20+ more games and screen-free activities.","W Banku gier Mądrej Sowy jest jeszcze ponad 20 gier oraz zabawy bez ekranu.")}</div>
       <button class="ghost" onclick="openChecklist()">🧭 ${LL("Чек-лист сенситивних періодів (PDF)","Чек-лист сенситивных периодов (PDF)","Sensitive Periods Checklist (PDF)")}</button>
     </div>`;
   }
-  return `<div style="margin:14px auto 4px;max-width:520px;padding:12px 14px;border-radius:14px;border:1px dashed rgba(255,255,255,.35);font-size:14px;line-height:1.45;text-align:center;opacity:.95">
-    🔒 ${LL("<b>Крок 2</b> — після повторного проходження через 7 днів тут відкриються: 🎲 Банк ігор Мудрої Сови для занять удома та 🧭 Чек-лист сенситивних періодів розвитку.",
-            "<b>Шаг 2</b> — после повторного прохождения через 7 дней здесь откроются: 🎲 Банк игр Мудрой Совы для занятий дома и 🧭 Чек-лист сенситивных периодов развития.",
-            "<b>Step 2</b> — after the repeat session in 7 days, you'll unlock: 🎲 the Wise Owl Games Bank for play at home and 🧭 the Sensitive Periods Checklist.")}
+  return `<div style="margin:14px auto 4px;max-width:520px;padding:14px;border-radius:14px;border:1px dashed rgba(255,255,255,.35);font-size:14px;line-height:1.45;text-align:center;opacity:.97;color:#fff">
+    <div style="font-weight:800;font-size:16px">🎁 ${LL("Подарунок після повторної гри через 7 днів","Подарок после повторной игры через 7 дней","Your gift after the repeat session in 7 days","Prezent po ponownej grze za 7 dni")}</div>
+    <div style="font-size:13px;opacity:.9;margin-top:4px">${LL("Добірка ігор за профілем вашої дитини:","Подборка игр по профилю вашего ребёнка:","A set of games matched to your child’s profile:","Zestaw gier dopasowany do profilu Twojego dziecka:")}</div>
+    ${weekPickHtml(true)}
+    <div style="font-size:13px">${LL("а також увесь 🎲 Банк ігор Мудрої Сови та 🧭 Чек-лист сенситивних періодів розвитку.","а также весь 🎲 Банк игр Мудрой Совы и 🧭 Чек-лист сенситивных периодов развития.","plus the whole 🎲 Wise Owl Games Bank and the 🧭 Sensitive Periods Checklist.","a także cały 🎲 Bank gier Mądrej Sowy i 🧭 Lista okresów sensytywnych.")}</div>
+    <div style="font-size:12.5px;opacity:.85;margin-top:8px">${LL("Повторна гра робить результат вашої дитини точнішим: добірку буде оновлено за новим результатом.","Повторная игра делает результат вашего ребёнка точнее: подборка обновится по новому результату.","The repeat session makes your child’s result more accurate: the set will be updated from the new result.","Ponowna gra sprawia, że wynik dziecka jest dokładniejszy: zestaw zostanie zaktualizowany według nowego wyniku.")}</div>
     <div style="font-size:12.5px;opacity:.8;margin-top:6px">${LL("Проходьте повторно на цьому ж пристрої та вкажіть те саме ім'я й дату народження дитини.","Проходите повторно на этом же устройстве и укажите то же имя и дату рождения ребёнка.","Use this same device and enter the same child's name and date of birth for the repeat session.")}</div>
   </div>`;
 }
