@@ -315,13 +315,17 @@ function unlock(){try{if(!actx){const C=window.AudioContext||window.webkitAudioC
   if(actx&&actx.state==='suspended')actx.resume();}catch(e){}}
 ['pointerdown','touchstart','keydown'].forEach(ev=>document.addEventListener(ev,unlock,{passive:true}));
 /* Ім'я файлу: кириличні символи ключа → _<код> (як у voice_manifest.json: sq_м → sq__43c) */
+/* v2026-10-07b: перефразовані репліки (нові ключі озвучки) */
+Object.assign(VOICE_TXT,{"suit_rep3": ["Тепер ти! Що Сова поклала у валізу? Обери й натисни.", "", "", ""], "maze_intro2": ["Знайди шлях у лабіринті. Натискай на клітинки поруч.", "", "", ""], "absurd_intro2": ["Що тут не так? Знайди й натисни.", "", "", ""], "st1b": ["Їжачок пішов до лісу. Під деревом він знайшов гриб і поклав його в кошик. Потім їжачок зустрів білочку й подарував їй жолуді.", "", "", ""], "puzzle_intro2": ["Склади картинку. Натисни на два елементи картинки, щоб поміняти їх місцями.", "Собери картинку. Нажми на два элемента картинки, чтобы поменять их местами.", "", ""], "sound_q2": ["Що із зображеного на картинках починається на той самий звук, що й слово…", "Что из изображённого на картинках начинается на тот же звук, что и слово…", "", ""]});
+const VALIAS={"uk": {"suit_rep2": "suit_rep3", "maze_intro": "maze_intro2", "absurd_intro": "absurd_intro2", "st1": "st1b", "puzzle_intro": "puzzle_intro2", "sound_q": "sound_q2"}, "ru": {"puzzle_intro": "puzzle_intro2", "sound_q": "sound_q2"}};
+function vk(key){return (VALIAS[LANG]||{})[key]||key;}
 function vfile(key){return 'audio/bank/'+LANG+'/'+String(key).replace(/[^\x00-\x7F]/g,c=>'_'+c.charCodeAt(0).toString(16))+'.mp3';}
 function getBuf(key){const id=LANG+':'+key;if(BUF[id])return BUF[id];if(!actx)return null;
   BUF[id]=fetch(vfile(key)).then(r=>{if(!r.ok)throw new Error('no file');return r.arrayBuffer();})
     .then(ab=>new Promise((res,rej)=>{try{const p=actx.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej);}catch(e){rej(e);}}));
   BUF[id].catch(()=>{delete BUF[id];});return BUF[id];}
 function stopVoice(){try{if(curSrc){curSrc.onended=null;curSrc.stop();}}catch(e){}curSrc=null;try{speechSynthesis.cancel();}catch(e){}}
-function say(key){lastKey=key;lastQueue=null;stopVoice();unlock();
+function say(key){key=vk(key);lastKey=key;lastQueue=null;stopVoice();unlock();
   const p=getBuf(key);
   if(p){p.then(buf=>{if(lastKey!==key)return;stopVoice();const s=actx.createBufferSource();s.buffer=buf;s.connect(actx.destination);s.start(0);curSrc=s;})
      .catch(()=>htmlAudio(key));}
@@ -393,7 +397,7 @@ Object.assign(T.uk,{startBtn:'Почати ▶',sample:'Зразок:',doneBtn:'
   daynight_p:'Бачиш сонце — натискай місяць. Бачиш місяць — натискай сонце!',beads_p:'Яка намистинка буде наступною?',
   cross_p:'Знайди й закресли всі такі фігурки, як на зразку!',cross_res:(h,t,f)=>`Знайдено: ${h} із ${t}. Зайвих натискань: ${f}.`,
   path_p:'Проведи пальчиком по доріжці й не виходь за край.',path_res:e=>e===0?'Жодного разу не вийшли за край!':`Виходів за край: ${e}.`,
-  sound_p:'Яка картинка починається на той самий звук, що й слово',syll_p:'Постукай у барабан стільки разів, скільки складів у слові.',
+  sound_p:'Що із зображеного на картинках починається на той самий звук, що й слово',syll_p:'Постукай у барабан стільки разів, скільки складів у слові.',
   request_p:'Слухай Сову й торкайся картинок по черзі.',suit_put_p:'Кладу у валізу…',suit_rep_p:'Що лежить у валізі? Обери й натисни на ці предмети.',
   suit_res:n=>`У валізі вмістилося предметів: ${n}!`,
   rest_h:'Сова трохи відпочине 🦉💤',rest_p:'Ми сьогодні чудово пограли! 10–15 хвилин на день — найкраще. Приходь завтра!',parentMore:'Для батьків: ще одна гра',
@@ -405,7 +409,7 @@ Object.assign(T.ru,{startBtn:'Начать ▶',sample:'Образец:',doneBtn
   daynight_p:'Видишь солнце — нажимай луну. Видишь луну — нажимай солнце!',beads_p:'Какая бусинка будет следующей?',
   cross_p:'Найди и зачеркни все такие фигурки, как на образце!',cross_res:(h,t,f)=>`Найдено: ${h} из ${t}. Лишних нажатий: ${f}.`,
   path_p:'Проведи пальчиком по дорожке и не выходи за край.',path_res:e=>e===0?'Ни разу не вышли за край!':`Выходов за край: ${e}.`,
-  sound_p:'Какая картинка начинается на тот же звук, что и слово',syll_p:'Постучи в барабан столько раз, сколько слогов в слове.',
+  sound_p:'Что из изображённого на картинках начинается на тот же звук, что и слово',syll_p:'Постучи в барабан столько раз, сколько слогов в слове.',
   request_p:'Слушай Сову и нажимай на картинки по очереди.',suit_put_p:'Кладу в чемодан…',suit_rep_p:'Что лежит в чемодане? Выбери и нажми на эти предметы.',
   suit_res:n=>`В чемодан поместилось предметов: ${n}!`,
   rest_h:'Сова немного отдохнёт 🦉💤',rest_p:'Мы сегодня отлично поиграли! 10–15 минут в день — лучше всего. Приходи завтра!',parentMore:'Для родителей: ещё одна игра',
@@ -625,7 +629,7 @@ function weekDays(){const d=new Date();const wd=(d.getDay()+6)%7;const mon=new D
 
 /* Черга фраз (прохання, валіза, склади): відтворюємо кліпи один за одним */
 let lastQueue=null;
-function sayQueue(keys,gap){lastQueue=keys;lastKey=null;stopVoice();unlock();gap=gap==null?.28:gap;
+function sayQueue(keys,gap){keys=keys.map(vk);lastQueue=keys;lastKey=null;stopVoice();unlock();gap=gap==null?.28:gap;
   const ps=keys.map(k=>getBuf(k));
   if(actx&&ps.every(p=>p)){const token=Symbol();sayQueue.tok=token;
     return Promise.all(ps).then(bufs=>{if(sayQueue.tok!==token)return;let t=actx.currentTime+.05;const srcs=[];
@@ -652,7 +656,7 @@ function PICO(o){const r=OBJ[o];
   if(r[0]==='OWL')return `<img src="${OWL}" alt="" style="border-radius:50%"/>`;
   if(r[0]&&IMG[r[0]])return img(r[0]);
   return `<span class="emo">${r[1]}</span>`;}
-const OBJS=()=>Object.keys(OBJ).filter(objAvail);
+const OBJS=()=>Object.keys(OBJ).filter(o=>objAvail(o)&&!(LANG==='uk'&&o==='bus'));
 function xpic(k,emoji){return XIMG[k]?`<img src="${XIMG[k]}" alt=""/>`:`<span class="emo">${emoji}</span>`;}
 
 function gameCard(k){const g=GT(k);return `<button class="mrow" onclick="launch('${k}')"><span class="em">${META[k].ic}</span>
@@ -1266,7 +1270,7 @@ function TX(o){return o[LANG]||o.uk;}
 const TXT={
  diff_p:{uk:'Знайди відмінності на нижній картинці',ru:'Найди отличия на нижней картинке',en:'Find the differences in the bottom picture',pl:'Znajdź różnice na dolnym obrazku'},
  absurd_p:{uk:'Що тут неправильно? Натисни',ru:'Что здесь неправильно? Нажми',en:"What's wrong here? Tap it",pl:'Co tu jest nie tak? Naciśnij'},
- puzzle_p:{uk:'Натисни на два шматочки — вони поміняються місцями',ru:'Нажми на два кусочка — они поменяются местами',en:'Tap two pieces to swap them',pl:'Naciśnij dwa kawałki — zamienią się miejscami'},
+ puzzle_p:{uk:'Натисни на 2 елементи картинки, щоб поміняти їх місцями',ru:'Нажми на 2 элемента картинки, чтобы поменять их местами',en:'Tap two pieces to swap them',pl:'Naciśnij dwa kawałki — zamienią się miejscami'},
  count_p:{uk:'Скільки тут предметів?',ru:'Сколько здесь предметов?',en:'How many are there?',pl:'Ile tu jest przedmiotów?'},
  more_p:{uk:'Де предметів більше?',ru:'Где предметов больше?',en:'Where are there more?',pl:'Gdzie jest więcej?'},
  less_p:{uk:'Де предметів менше?',ru:'Где предметов меньше?',en:'Where are there fewer?',pl:'Gdzie jest mniej?'},
@@ -1286,6 +1290,8 @@ const TXT={
 const SCENES={"meadow": {"bg": "bg_meadow", "slots": {"g1": [27, 86, 13.5, "ground"], "g2": [10, 72, 12.0, "ground"], "g3": [46, 79, 13.5, "ground"], "g4": [58, 96, 15.0, "ground"], "g5": [36, 67, 10.5, "ground"], "b1": [22, 33, 10.5, "branch"], "b2": [37, 28, 9.0, "branch"], "s1": [52, 24, 10.5, "sky"], "s2": [63, 14, 12.0, "sky"], "w1": [77, 87, 12.0, "water"], "r1": [80, 40, 13.5, "roof"]}, "normal": {"ground": ["ball", "basket", "mushroom", "hedgehog", "rabbit", "fox", "dog", "cat"], "branch": ["squirrel"], "sky": ["balloon", "sun", "butterfly", "bee"], "water": ["boat"]}, "absurd": [["fish", "branch"], ["snowman", "ground"], ["sled", "ground"], ["elephant", "roof"], ["bus", "water"], ["mittens", "branch"]]}, "winter": {"bg": "bg_winter", "slots": {"g1": [12, 92, 13.5, "ground"], "g2": [27, 82, 13.5, "ground"], "g3": [46, 68, 10.5, "ground"], "g4": [62, 67, 10.5, "ground"], "g5": [92, 95, 12.0, "ground"], "g6": [37, 63, 9.0, "ground"], "b1": [19, 40, 10.5, "branch"], "b2": [8, 28, 9.0, "branch"], "s1": [55, 20, 12.0, "sky"], "w1": [60, 86, 13.5, "ice"], "r1": [78, 28, 12.0, "roof"]}, "normal": {"ground": ["snowman", "sled", "mittens", "hat", "pinecone", "fox", "dog", "rabbit"], "branch": ["squirrel"], "sky": ["moon"], "ice": []}, "absurd": [["butterfly", "sky"], ["mushroom", "ground"], ["pineapple", "branch"], ["fish", "branch"], ["lemon", "branch"], ["boat", "ice"]]}, "room": {"bg": "bg_room", "slots": {"r1": [38, 86, 13.5, "floor"], "r2": [57, 90, 13.5, "floor"], "f1": [12, 96, 13.5, "floor"], "f2": [68, 97, 12.0, "floor"], "t1": [70, 58, 9.0, "table"], "c1": [84, 66, 7.5, "chair"], "h1": [75, 21, 7.5, "shelf"], "h2": [88, 21, 7.5, "shelf"], "h3": [75, 37, 7.5, "shelf"], "h4": [88, 37, 7.5, "shelf"], "k1": [50, 32, 10.5, "sky"]}, "normal": {"floor": ["ball", "car", "teddy", "basket", "puzzle", "kite"], "table": ["teacup", "puzzle", "pen", "apple"], "chair": ["teddy"], "shelf": ["car", "teacup", "ball", "pinecone", "plate"], "sky": ["balloon"]}, "absurd": [["snowman", "floor"], ["mushroom", "floor"], ["fish", "chair"], ["sun", "sky"], ["sled", "table"], ["boat", "shelf"]]}, "kitchen": {"bg": "bg_kitchen", "slots": {"s1": [15, 50, 10.5, "stove"], "t1": [40, 59, 9.0, "table"], "t2": [52, 59, 9.0, "table"], "t3": [64, 59, 9.0, "table"], "h1": [88, 24, 7.5, "shelf"], "h2": [88, 36, 7.5, "shelf"], "h3": [88, 45, 7.5, "shelf"], "f1": [30, 97, 12.0, "floor"], "f2": [80, 97, 13.5, "floor"], "a1": [50, 32, 10.5, "sky"]}, "normal": {"stove": ["teapot"], "table": ["plate", "cheese", "carrot", "banana", "lemon", "pear", "apple", "teacup", "spoon"], "shelf": ["teacup", "lemon", "pear", "plate"], "floor": ["basket"], "sky": []}, "absurd": [["boat", "stove"], ["fish", "sky"], ["sled", "table"], ["snowman", "floor"], ["mittens", "stove"], ["bus", "shelf"]]}};
 
 /* Сцена: фон + предмети-наклейки у слотах; x,y — середина нижнього краю предмета (%), w — ширина (% ширини сцени) */
+const DIFF_MIRROR=new Set(['boat','carrot','hedgehog','sled','squirrel']);
+const DIFF_HUE=new Set(['ball','banana','basket','boat','carrot','cheese','lemon','moon','mushroom','pinecone','squirrel','sun']);
 function sceneHTML(sc,items,id,extra){const S=SCENES[sc];
   return `<div class="scene" id="${id}" style="background-image:url(${NIMG+S.bg}.webp)">${items.map(it=>{const [x,y0,w]=S.slots[it.slot];const y=Math.max(y0,w*1.2*1.55+2);   /* не виходити за верхній край */
     const tf='translate(-50%,-100%)'+(it.mod==='mirror'?' scaleX(-1)':'');const fl=it.mod==='hue'?'filter:hue-rotate(150deg) saturate(1.5);':'';
@@ -1309,9 +1315,12 @@ GAME.diff=function(){
     const idx=shuffle(items.map((_,i)=>i)).slice(0,nd);const itemsB=items.map(it=>Object.assign({},it));
     idx.forEach((ix,j)=>{const it=itemsB[ix],kind=kinds[j%kinds.length];
       if(kind==='remove')it.remove=true;
-      else if(kind==='swap'){const alt=shuffle((S.normal[S.slots[it.slot][3]]||[]).filter(k=>!usedK.has(k)&&hasPic(k)))[0];
-        if(alt){it.k=alt;usedK.add(alt);}else it.mod='hue';}
-      else it.mod=kind;});
+      else{let kd=kind;   /* віддзеркалення — лише для явно несиметричних, колір — лише для яскравих наліпок */
+        if(kd==='mirror'&&!DIFF_MIRROR.has(it.k))kd='hue';
+        if(kd==='hue'&&!DIFF_HUE.has(it.k))kd='swap';
+        if(kd==='swap'){const alt=shuffle((S.normal[S.slots[it.slot][3]]||[]).filter(k=>!usedK.has(k)&&hasPic(k)))[0];
+          if(alt){it.k=alt;usedK.add(alt);}else if(DIFF_HUE.has(it.k))it.mod='hue';else it.remove=true;}
+        else it.mod=kd;}});
     const ch=idx.map(ix=>items[ix].slot);total+=ch.length;let left=ch.length;
     const hot=ch.map(sid=>{const [x,y,w]=S.slots[sid];return `<div class="hot" data-slot="${sid}" style="left:${x}%;top:${y-w*0.9}%;width:${Math.max(13,w*1.7)}%"></div>`;}).join('');
     app.innerHTML=topbar('diff')+`<div class="screen scr-scene"><p class="big">${TX(TXT.diff_p)}: <b id="dl">${left}</b></p>
@@ -1518,7 +1527,7 @@ const STORIES=[
 GAME.story=function(){
   let avail=STORIES.filter(s=>AGE>=s.min);if(!avail.length)avail=STORIES.slice(0,3);const idx=lsGet('owl_story_i',0)%avail.length;lsSet('owl_story_i',idx+1);
   const st=avail[idx];const qs=LV<=4?st.q.slice(0,2):st.q;let qi=0,correct=0;
-  const txt=(VOICE_TXT[st.id]||[])[['uk','ru','en','pl'].indexOf(LANG)]||'';
+  const txt=(VOICE_TXT[vk(st.id)]||[])[['uk','ru','en','pl'].indexOf(LANG)]||'';
   const listen=()=>{if(curGame!=='story')return;
     app.innerHTML=topbar('story')+`<div class="screen"><h2>${TX(TXT.story_listen)}</h2>
       <div class="stim storyhero">${st.hero.map(h=>SP(h)).join('')}</div>
