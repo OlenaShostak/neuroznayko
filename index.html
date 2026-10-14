@@ -606,7 +606,7 @@ function genCode(){const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i
 /* URL веб-застосунку Google Apps Script (закінчується на /exec).
    Порожній рядок — дані нікуди не надсилаються, лишається лише CSV. */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxL-PDMPAZZzH8uVMhVGjRQlZIs3n8DuUdUkxi6p_ZZDdsEMkaIOOi_UyXIpXTk5t73/exec";
-const APP_VERSION = "2026-10-13";
+const APP_VERSION = "2026-10-14";
 const TRIAL_TIMEOUT_MS = 35000;      /* бездіяльність на пробі → проба фіксується як пропущена */
 const MEM_TIMEOUT_MS   = 70000;      /* «Запам'ятай»: довше, бо дитина обирає кілька картинок */
 
@@ -1217,12 +1217,16 @@ function blockMemory(){const span=_memSpan(),r=_rng("memory"),pool=formPool(PHOT
  app.innerHTML=`<div class="screen"><h2>${t("memTitle")}</h2><p class="big">${t("memShow")}</p><div class="grid" style="grid-template-columns:repeat(${cols},1fr);max-width:${span===8?480:420}px">${tg.map(k=>`<div class="tile">${photoCard(k)}</div>`).join("")}</div></div>`;
  say(t("memShow"));setProg(.16);setTimeout(()=>memRecall(tg),span===8?14000:11000);}
 function memRecall(tg){const span=tg.length,dis=S._memDis||sample(PHOTO_KEYS,span,tg),all=sshuffle(tg.concat(dis),_rng("memory-recall")),picked=new Set(),t0=Date.now();
- app.innerHTML=`<div class="screen"><h2>${t("memTitle")}</h2><p class="big">${t("memAsk")}</p><div class="grid" id="g" style="grid-template-columns:repeat(4,1fr);max-width:min(520px,calc((100vh - 260px) * ${4/Math.ceil(all.length/4)}))"></div><button class="btn" id="ok" style="margin-top:14px">${t("next")} ✓</button></div>`;
- const g=document.getElementById("g");all.forEach(k=>{const d=document.createElement("div");d.className="tile";d.innerHTML=photoCard(k);d.onclick=()=>{if(picked.has(k)){picked.delete(k);d.classList.remove("pick");}else{picked.add(k);d.classList.add("pick");}};g.appendChild(d);});
+ app.innerHTML=`<div class="screen"><h2>${t("memTitle")}</h2><p class="big">${t("memAsk")}</p><div id="memcnt" style="display:flex;gap:8px;justify-content:center;margin:2px 0 10px">${tg.map(()=>`<span style="width:18px;height:18px;border-radius:50%;border:2.5px solid #fff;box-sizing:border-box;display:inline-block"></span>`).join("")}</div><div class="grid" id="g" style="grid-template-columns:repeat(4,1fr);max-width:min(520px,calc((100vh - 260px) * ${4/Math.ceil(all.length/4)}))"></div><button class="btn" id="ok" style="margin-top:14px">${t("next")} ✓</button></div>`;
+ const g=document.getElementById("g");all.forEach(k=>{const d=document.createElement("div");d.className="tile";d.innerHTML=photoCard(k);d.onclick=()=>{if(picked.has(k)){picked.delete(k);d.classList.remove("pick");}else{
+     /* з 2026-10-14: можна обрати не більше картинок, ніж було показано (стратегія «обрати все» неможлива) */
+     if(picked.size>=span){ try{document.getElementById("memcnt").animate([{transform:"translateX(0)"},{transform:"translateX(-8px)"},{transform:"translateX(8px)"},{transform:"translateX(0)"}],{duration:280});}catch(e){} return; }
+     picked.add(k);d.classList.add("pick");}
+   const dots=document.getElementById("memcnt");if(dots)[...dots.children].forEach((c,i)=>{c.style.background=i<picked.size?"var(--accent)":"transparent";});};g.appendChild(d);});
  say(t("memAsk"));
  const submit=(auto)=>{ if(!trialAnswer())return; const hits=[...picked].filter(k=>tg.includes(k)).length,fa=[...picked].filter(k=>!tg.includes(k)).length;
    if(auto&&picked.size===0){ log("memory","recognition",null,Date.now()-t0,{hits:0,false_alarms:0,span,skipped:1}); }
-   else { log("memory","recognition",hits-fa,Date.now()-t0,{hits,false_alarms:fa,span,auto_submit:auto?1:0}); }
+   else { log("memory","recognition",hits-fa,Date.now()-t0,{hits,false_alarms:fa,span,auto_submit:auto?1:0,capped:1}); }
    reward(blockDCCS); };
  trialStart(()=>{_trialDone=false;submit(true);},MEM_TIMEOUT_MS);
  g.querySelectorAll(".tile").forEach(el=>el.addEventListener("click",()=>{ if(!_trialDone) trialStart(()=>{_trialDone=false;submit(true);},MEM_TIMEOUT_MS); }));
