@@ -606,7 +606,7 @@ function genCode(){const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i
 /* URL веб-застосунку Google Apps Script (закінчується на /exec).
    Порожній рядок — дані нікуди не надсилаються, лишається лише CSV. */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxL-PDMPAZZzH8uVMhVGjRQlZIs3n8DuUdUkxi6p_ZZDdsEMkaIOOi_UyXIpXTk5t73/exec";
-const APP_VERSION = "2026-10-14";
+const APP_VERSION = "2026-10-14b";
 const TRIAL_TIMEOUT_MS = 35000;      /* бездіяльність на пробі → проба фіксується як пропущена */
 const MEM_TIMEOUT_MS   = 70000;      /* «Запам'ятай»: довше, бо дитина обирає кілька картинок */
 
@@ -625,8 +625,10 @@ const DCCS_FORMS  = {"A":{"3":{"color":[[1,2],[2,0],[1,2],[0,2],[0,1],[2,0]],"sh
 
 /* ===== Проба: захист від подвійного натискання + тайм-аут бездіяльності ===== */
 let _trialTimer=null,_trialDone=true;
-function trialStart(onTimeout,ms){clearTimeout(_trialTimer);_trialDone=false;_trialTimer=setTimeout(()=>{if(_trialDone)return;_trialDone=true;onTimeout();},ms||TRIAL_TIMEOUT_MS);}
-function trialAnswer(){if(_trialDone)return false;_trialDone=true;clearTimeout(_trialTimer);return true;}
+let _trialT0=0;
+function trialStart(onTimeout,ms){clearTimeout(_trialTimer);_trialDone=false;_trialT0=Date.now();_trialTimer=setTimeout(()=>{if(_trialDone)return;_trialDone=true;onTimeout();},ms||TRIAL_TIMEOUT_MS);}
+/* з 2026-10-14b: дотик раніше ніж через 400 мс після появи проби — це «перенесений» дотик з попереднього екрана; ігнорується */
+function trialAnswer(){if(_trialDone)return false;if(Date.now()-_trialT0<400)return false;_trialDone=true;clearTimeout(_trialTimer);return true;}
 function trialStop(){_trialDone=true;clearTimeout(_trialTimer);}
 
 /* ===== Облік відсіву: короткі «відмітки прогресу» в таблицю (без імені та дати народження) =====
@@ -1064,7 +1066,8 @@ function colorCheck(done){
     for(let k=0;k<4;k++){const isT=(k===pos[i]);const col=DCCS_COL[isT?tr.t:tr.o];
       const d=document.createElement("div");d.style.cssText="background:var(--paper);border-radius:16px;padding:10px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.2)";
       d.innerHTML=`<svg viewBox="0 0 100 100" width="72" height="72"><circle cx="50" cy="50" r="34" fill="${col}" fill-opacity="0.85" stroke="#2b2b2b" stroke-width="2.5"/></svg>`;
-      d.onclick=()=>{ if(!trialAnswer())return; res[i]=isT?1:0;
+      d.onclick=()=>{ if(Date.now()-t0<700)return;   /* з 2026-10-14b: ігноруємо «подвійний» дотик, що переходить з попереднього екрана */
+        if(!trialAnswer())return; res[i]=isT?1:0;
         log("colorcheck",tr.id,isT?1:0,Date.now()-t0,{scored:0});
         setTimeout(()=>step(i+1),300); };
       cc.appendChild(d);}
