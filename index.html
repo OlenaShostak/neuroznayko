@@ -606,7 +606,7 @@ function genCode(){const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i
 /* URL веб-застосунку Google Apps Script (закінчується на /exec).
    Порожній рядок — дані нікуди не надсилаються, лишається лише CSV. */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxL-PDMPAZZzH8uVMhVGjRQlZIs3n8DuUdUkxi6p_ZZDdsEMkaIOOi_UyXIpXTk5t73/exec";
-const APP_VERSION = "2026-10-14c";
+const APP_VERSION = "2026-10-14d";
 const TRIAL_TIMEOUT_MS = 35000;      /* бездіяльність на пробі → проба фіксується як пропущена */
 const MEM_TIMEOUT_MS   = 70000;      /* «Запам'ятай»: довше, бо дитина обирає кілька картинок */
 
@@ -1987,6 +1987,12 @@ function weekPickHtml(locked){
 }
 /* Повторне проходження: пояснення щодо можливої хибної поради «до офтальмолога» у першому звіті
    (до версії 2026-10-14b подвійний дотик при зміні екрана міг зараховуватися як помилка в перевірці кольорів) */
+/* Пояснення для батьків: як критично читати поради скринінгу (з 2026-10-14c) */
+function adviceNoteText(){ return LL(
+ "Як читати поради. Це автоматичний ігровий скринінг, а не обстеження. На результат впливають самопочуття дитини, те, чи зрозуміла вона завдання, і техніка (випадкові натискання, збої екрана). Тому оцінюйте поради критично: якщо в повсякденному житті ви не помічаєте в дитини труднощів у цій сфері, найкраще спершу повторити гру через 7 днів. Якщо ж труднощі ви бачите самі — порада варта уваги незалежно від гри.",
+ "Как читать советы. Это автоматический игровой скрининг, а не обследование. На результат влияют самочувствие ребёнка, то, понял ли он задание, и техника (случайные нажатия, сбои экрана). Поэтому оценивайте советы критически: если в повседневной жизни вы не замечаете у ребёнка трудностей в этой сфере, лучше сначала повторить игру через 7 дней. Если же трудности вы видите сами — совет стоит внимания независимо от игры.",
+ "How to read the advice. This is an automated game-based screening, not an assessment. The result is affected by how your child felt, whether they understood the tasks, and by technology (accidental taps, screen glitches). So weigh the advice critically: if you see no difficulties in this area in everyday life, it is best to repeat the game in 7 days first. If you do see difficulties yourself, the advice deserves attention regardless of the game.",
+ "Jak czytać wskazówki. To automatyczne badanie przesiewowe w formie gry, a nie diagnoza. Na wynik wpływają samopoczucie dziecka, to, czy zrozumiało zadania, oraz technika (przypadkowe dotknięcia, błędy ekranu). Dlatego prosimy podchodzić do wskazówek krytycznie: jeśli na co dzień nie zauważają Państwo u dziecka trudności w danym obszarze, najlepiej najpierw powtórzyć grę po 7 dniach. Jeśli natomiast sami Państwo widzą trudności, wskazówka zasługuje na uwagę niezależnie od wyniku gry."); }
 function colorNoteHtml(){
   if(!step2Open() || S.colorCheck!=="ok" || (S.parent&&S.parent.p_colorvision==="так")) return "";
   const txt=LL("Важливо: якщо в минулому звіті була порада звернутися до офтальмолога для перевірки розрізнення кольорів, вона могла з'явитися через технічну помилку гри (зайве натискання під час зміни екрана). Цю помилку вже виправлено. Цього разу дитина успішно пройшла перевірку розрізнення кольорів, тож ця порада не актуальна.",
@@ -2203,6 +2209,7 @@ function makePDF(){
  body.push({text:L.spec,style:"h2"});
  if(pr.specList.length){
    pr.specList.forEach(sp=>body.push({text:`• ${sp.name} — ${sp.reason}`,style:"p"}));
+   body.push({text:adviceNoteText(),style:"p",italics:true,color:"#555",margin:[0,6,0,0]});
  } else {
    body.push({text:L.noSpec,style:"p"});
  }
@@ -2357,7 +2364,7 @@ function finishAll(){setProg(1);S.finished=Date.now();const sc=scoreChild();S.sc
    "Дякуємо, що допомогли своїй дитині! Якщо сподобалось — розкажіть про «НейроЗнайко» іншим родинам.",
    "Спасибо, что помогли своему ребёнку! Если понравилось — расскажите о «НейроЗнайке» другим семьям.",
    "Thank you for helping your child! If you liked it, tell other families about NeuroWhizKid.")
- app.innerHTML=`<div class="screen" style="max-width:640px"><h2>${t("summary")}</h2>${relNote}
+ app.innerHTML=`<div class="screen" style="max-width:640px"><h2>${t("summary")}</h2>${relNote}<div style="margin:0 0 12px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.10);text-align:left;font-size:13.5px;line-height:1.45;color:#fff;opacity:.95">💡 ${adviceNoteText()}</div>
    <div style="max-height:38vh;overflow:auto;border-radius:12px">${tbl}</div>
    ${colorNoteHtml()}
    <div style="margin-top:16px">
