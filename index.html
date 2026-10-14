@@ -1681,7 +1681,7 @@ function ageText(){
   // simple robust plural for uk/ru/en
   function ru(n,a,b,c){n=Math.abs(n)%100;const n1=n%10;if(n>10&&n<20)return c;if(n1>1&&n1<5)return b;if(n1===1)return a;return c;}
   const yrs = lang=="pl" ? (y+" "+ru(y,"rok","lata","lat")) : lang=="en" ? (y+" "+(y===1?"year":"years")) : (lang=="ru" ? (y+" "+ru(y,"год","года","лет")) : (y+" "+ru(y,"рік","роки","років")));
-  const mos = mo===0 ? "" : lang=="pl" ? (" "+mo+" "+ru(mo,"miesiąc","miesiące","miesięcy")) : (lang=="en" ? (" "+mo+" "+(mo===1?"month":"months")) : (lang=="ru" ? (" "+mo+" "+ru(mo,"месяц","месяца","месяцев")) : (" "+mo+" "+ru(mo,"місяць","місяці","місяців"))));
+  const mos = mo===0 ? "" : lang=="pl" ? (" i "+mo+" "+ru(mo,"miesiąc","miesiące","miesięcy")) : (lang=="en" ? (" "+mo+" "+(mo===1?"month":"months")) : (lang=="ru" ? (" "+mo+" "+ru(mo,"месяц","месяца","месяцев")) : (" "+mo+" "+ru(mo,"місяць","місяці","місяців"))));
   return yrs+mos;
 }
 
