@@ -49,6 +49,7 @@
   .form h2{color:var(--ink)} .form p{font-size:14.5px;line-height:1.55}
   .form label{display:block;margin:14px 0 5px;font-weight:700;font-size:15px}
   .form input,.form select,.form textarea{width:100%;padding:10px;border:1.5px solid #bbb;border-radius:10px;font-size:15px;font-family:inherit}
+.form input[type=checkbox],.form input[type=radio]{width:22px;height:22px;padding:0;flex:0 0 auto}
   .rowopts{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
   .chip{border:1.5px solid #bbb;border-radius:20px;padding:7px 14px;cursor:pointer;font-size:14px;background:#fff}
   .chip.sel{background:var(--see);color:#fff;border-color:var(--see)}
@@ -606,7 +607,7 @@ function genCode(){const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i
 /* URL веб-застосунку Google Apps Script (закінчується на /exec).
    Порожній рядок — дані нікуди не надсилаються, лишається лише CSV. */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxL-PDMPAZZzH8uVMhVGjRQlZIs3n8DuUdUkxi6p_ZZDdsEMkaIOOi_UyXIpXTk5t73/exec";
-const APP_VERSION = "2026-10-14d";
+const APP_VERSION = "2026-10-20";
 const TRIAL_TIMEOUT_MS = 35000;      /* бездіяльність на пробі → проба фіксується як пропущена */
 const MEM_TIMEOUT_MS   = 70000;      /* «Запам'ятай»: довше, бо дитина обирає кілька картинок */
 
@@ -1563,8 +1564,8 @@ function renderDomain(dom){
 }
 function parentForm(){setProg(.12);let h=`<div class="screen"><div class="form"><h2>${t("pTitle")}</h2>`;
  h+=`<p style="margin:-4px 0 10px;opacity:.85">${LL("Анкету підібрано для віку: ","Анкета подобрана для возраста: ","Questionnaire tailored to age: ")}<b>${ageText()}</b></p>`;
- h+=`<label>${LL("Email для нагадування про повторне проходження (необов'язково)","Email для напоминания о повторном прохождении (необязательно)","Email for a retest reminder (optional)")}</label><input type="email" id="p_email" placeholder="[email protected]">
- <label style="display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:15px;margin-top:6px;cursor:pointer"><input type="checkbox" id="p_followup_ok" style="margin-top:4px"><span>${LL("Дозволяю один раз написати мені на цю адресу приблизно через місяць із 2–3 короткими запитаннями про те, чи був корисним звіт. У цьому разі адреса передається дослідниці лише для цього листа.","Разрешаю один раз написать мне на этот адрес примерно через месяц с 2–3 короткими вопросами о том, был ли полезен отчёт. В этом случае адрес передаётся исследовательнице только для этого письма.","You may email me once, about a month from now, with 2–3 short questions about whether the report was useful. In that case the address is passed to the researcher for this one email only.","Zgadzam się na jednorazowy e-mail za około miesiąc z 2–3 krótkimi pytaniami o przydatność raportu. W takim przypadku adres jest przekazywany badaczce wyłącznie do tego listu.")}</span></label>`;
+ h+=`<label>${LL("Email для нагадування про повторне проходження (необов'язково)","Email для напоминания о повторном прохождении (необязательно)","Email for a retest reminder (optional)")}</label><input type="email" id="p_email" placeholder="name@example.com">
+ <label style="display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:15px;margin-top:6px;cursor:pointer"><input type="checkbox" id="p_followup_ok" style="width:22px;height:22px;flex:0 0 auto;margin-top:2px"><span style="flex:1 1 auto;min-width:0">${LL("Дозволяю один раз написати мені на цю адресу приблизно через місяць із 2–3 короткими запитаннями про те, чи був корисним звіт. У цьому разі адреса передається дослідниці лише для цього листа.","Разрешаю один раз написать мне на этот адрес примерно через месяц с 2–3 короткими вопросами о том, был ли полезен отчёт. В этом случае адрес передаётся исследовательнице только для этого письма.","You may email me once, about a month from now, with 2–3 short questions about whether the report was useful. In that case the address is passed to the researcher for this one email only.","Zgadzam się na jednorazowy e-mail za około miesiąc z 2–3 krótkimi pytaniami o przydatność raportu. W takim przypadku adres jest przekazywany badaczce wyłącznie do tego listu.")}</span></label>`;
  h+=`<label>${LL("Відвідує ЗДО","Посещает детсад","Attends kindergarten")}</label><div class="rowopts" data-single="p_kg"><div class="chip" data-v="так">${LL("так","да","yes")}</div><div class="chip" data-v="ні">${LL("ні","нет","no")}</div></div>`;
  h+=`<label>${LL("Мова спілкування вдома","Язык общения дома","Language spoken at home")}</label><div class="rowopts" data-single="p_lang"><div class="chip" data-v="одна">${LL("одна","один","one")}</div><div class="chip" data-v="дві">${LL("дві","два","two")}</div><div class="chip" data-v="більше">${LL("більше двох","более двух","more than two")}</div></div>`;
  h+=`<label>${LL("Пологи були передчасними або з ускладненнями","Роды были преждевременными или с осложнениями","Birth was premature or with complications")}</label><div class="rowopts" data-single="p_anam_birth"><div class="chip" data-v="так">${LL("так","да","yes")}</div><div class="chip" data-v="ні">${LL("ні","нет","no")}</div><div class="chip" data-v="не знаю">${LL("не знаю","не знаю","don't know")}</div></div>`;
