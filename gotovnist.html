@@ -166,7 +166,7 @@
    Ім'я та дата народження дитини лишаються на пристрої й нікуди не надсилаються.
    ===================================================================== */
 const CFG={
-  ENDPOINT:"",                 /* URL веб-застосунку Google Apps Script (/exec). Порожньо — дані лишаються на пристрої. */
+  ENDPOINT:"https://script.google.com/macros/s/AKfycbxU3NpqVuDZFtXQhkI-Ara1cSWXEGHtSafaZ9h4RJegGK5HcoH-rvBaa0jgtjYpGEWtCg/exec",                 /* URL веб-застосунку Google Apps Script (/exec). Порожньо — дані лишаються на пристрої. */
   VERSION:"gs-0.7.1",BUILD:"2026-10-22",
   TIMEOUT_MS:35000,            /* бездіяльність на пробі → пропуск */
   STOP_AFTER:3,                /* правило зупинки: помилок поспіль */
@@ -443,7 +443,7 @@ const owl=()=>`<img src="${OWL_IMG}" draggable="false" alt="Мудра Сова"
 
 /* ===================== НАДСИЛАННЯ ДАНИХ ===================== */
 function queue(payload){ if(!CFG.ENDPOINT) return; const q=LS.get(OUTBOX,[]); payload.batch=S.session+"-"+Date.now().toString(36)+"-"+rnd5(3); payload.v=CFG.VERSION; q.push(payload); LS.set(OUTBOX,q); }
-async function flush(){ if(!CFG.ENDPOINT) return "off"; const q=LS.get(OUTBOX,[]); if(!q.length) return "ok"; const left=[];
+async function flush(){ if(!CFG.ENDPOINT||(FAST&&location.hostname==="localhost")) return "off";   /* автотести на localhost нічого не надсилають */ const q=LS.get(OUTBOX,[]); if(!q.length) return "ok"; const left=[];
   for(const p of q){ try{ await fetch(CFG.ENDPOINT,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(p)}); }catch(e){ left.push(p); } }
   LS.set(OUTBOX,left); return left.length?"wait":"ok"; }
 
