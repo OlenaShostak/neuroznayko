@@ -25,7 +25,9 @@
     "рукавиця": "рукави-ця",
     "жолудь": "<phoneme alphabet='ipa' ph='ˈʒɔludʲ'>жолудь</phoneme>",
     "човен": "<phoneme alphabet='ipa' ph='ˈt͡ʃɔwen'>човен</phoneme>",
-    "перо": "пероо"
+    "перо": "пероо",
+    "каша": "<phoneme alphabet='ipa' ph='ˈkaʃa'>каша</phoneme>",
+    "пінгвін": "пінг-віін"
   },
   "uk-UA-OstapNeural": {
     "розумниця": "роз умниця",

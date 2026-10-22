@@ -465,7 +465,7 @@ Object.assign(GAMES_I18N,{
  beads:{uk:['','Продовж намисто','Яка намистинка буде наступною?'],ru:['','Продолжи бусы','Какая бусинка будет следующей?'],en:['','Finish the necklace','Which bead comes next?']},
  cross:{uk:['','Закресли кружечки','Знайди всі фігурки, як на зразку.'],ru:['','Зачеркни кружочки','Найди все фигурки, как на образце.'],en:['','Cross out the circles','Find all the shapes like the sample.']},
  path:{uk:['','Доріжка','Проведи пальчиком і не виходь за край.'],ru:['','Дорожка','Проведи пальчиком и не выходи за край.'],en:['','Follow the path','Trace with your finger, stay inside.']},
- sound:{uk:['','Перший звук','Знайди слово, що починається так само.'],ru:['','Первый звук','Найди слово, которое начинается так же.'],en:['','First sound','Find a word that starts the same way.']},
+ sound:{uk:['','Звуки-близнюки','Знайди слово, що починається так само.'],ru:['','Звуки-близнецы','Найди слово, которое начинается так же.'],en:['','Sound twins','Find a word that starts the same way.']},
  syll:{uk:['','Плескаємо склади','Постукай стільки, скільки складів.'],ru:['','Хлопаем слоги','Постучи столько, сколько слогов.'],en:['','Clap the syllables','Tap once for each syllable.']},
  request:{uk:['','Прохання Сови','Послухай і торкнись по черзі.'],ru:['','Просьба Совы','Послушай и нажми по очереди.'],en:['',"Owl's request",'Listen, then tap in order.']},
  suitcase:{uk:['','Валіза Сови',"Запам'ятай, що лежить у валізі."],ru:['','Чемодан Совы','Запомни, что лежит в чемодане.'],en:['',"Owl's suitcase","Remember what's in the suitcase."]},
@@ -486,7 +486,7 @@ const GI_PL={
  beads:['','Dokończ korale','Jaki koralik będzie następny?'],
  cross:['','Skreśl kółka','Znajdź wszystkie figurki jak na wzorze.'],
  path:['','Ścieżka','Prowadź paluszkiem i nie wychodź poza brzeg.'],
- sound:['','Pierwsza głoska','Znajdź słowo, które zaczyna się tak samo.'],
+ sound:['','Bliźniacze głoski','Znajdź słowo, które zaczyna się tak samo.'],
  syll:['','Wyklaskujemy sylaby','Uderz tyle razy, ile jest sylab.'],
  request:['','Prośba Sowy','Posłuchaj i dotknij po kolei.'],
  suitcase:['','Walizka Sowy','Zapamiętaj, co jest w walizce.']};
@@ -649,7 +649,8 @@ function replay(){if(lastQueue)sayQueue(lastQueue);else if(lastKey)say(lastKey);
 /* Предмети для ігор зі словами. Картинки: XIMG (нові, надіслані) → IMG (наявні) → емодзі-заглушка */
 const XIMG={};   /* сюди додаються нові картинки: XIMG.ball="data:image/webp;base64,..." */
 const OBJ={"mouse": ["mouse", null, "ми-ша", "мыш-ка", "mouse", "м", "м", "m"], "honey": ["honey", null, "мед", "мёд", "hon-ey", "м", "мь", "h"], "ball": [null, "⚽", "м'яч", "мяч", "ball", "м", "мь", "b"], "car": ["car", null, "ма-ши-на", "ма-ши-на", "car", "м", "м", "k"], "owl": ["OWL", null, "со-ва", "со-ва", "owl", "с", "с", "ow"], "sun": [null, "☀️", "сон-це", "солн-це", "sun", "с", "с", "s"], "elephant": [null, "🐘", "слон", "слон", "el-e-phant", "с", "с", "e"], "dog": ["dog", null, "со-ба-ка", "со-ба-ка", "dog", "с", "с", "d"], "cat": ["cat", null, "кіт", "кот", "cat", "кі", "к", "k"], "key": ["key", null, "ключ", "ключ", "key", "к", "к", "k"], "cow": ["cow", null, "ко-ро-ва", "ко-ро-ва", "cow", "к", "к", "k"], "fox": ["fox", null, "ли-си-ця", "ли-са", "fox", "л", "ль", "f"], "lemon": [null, "🍋", "ли-мон", "ли-мон", "lem-on", "л", "ль", "l"], "spoon": [null, "🥄", "лож-ка", "лож-ка", "spoon", "л", "л", "sp"], "lion": [null, "🦁", "лев", "лев", "li-on", "л", "ль", "l"], "socks": ["socks", null, "шкар-пет-ки", "нос-ки", "socks", "ш", "н", "s"], "balloon": [null, "🎈", "куль-ка", "ша-рик", "bal-loon", "к", "ш", "b"], "orange": ["orange", null, "а-пель-син", "а-пель-син", "or-ange", "а", "а", "o"], "pineapple": [null, "🍍", "а-на-нас", "а-на-нас", "pine-ap-ple", "а", "а", "p"], "bus": [null, "🚌", "ав-то-бус", "ав-то-бус", "bus", "а", "а", "b"], "moon": [null, "🌙", "мі-сяць", "лу-на", "moon", "мі", "л", "m"], "bee": ["bee", null, "бджо-ла", "пче-ла", "bee", "б", "п", "b"], "bear": ["brownbear", null, "вед-мідь", "мед-ведь", "bear", "в", "мь", "b"], "banana": [null, "🍌", "ба-нан", "ба-нан", "ba-na-na", "б", "б", "b"], "fish": [null, "🐟", "ри-ба", "ры-ба", "fish", "р", "р", "f"], "frog": ["frog", null, "жа-ба", "ля-гуш-ка", "frog", "ж", "ль", "fr"], "pig": ["pig", null, "сви-ня", "сви-нья", "pig", "с", "с", "p"], "pear": ["pear", null, "гру-ша", "гру-ша", "pear", "г", "г", "p"], "pen": ["pen", null, "руч-ка", "руч-ка", "pen", "р", "р", "p"], "peach": ["peach", null, "пер-сик", "пер-сик", "peach", "п", "п", "p"], "watermelon": ["watermelon", null, "ка-вун", "ар-буз", "wa-ter-mel-on", "к", "а", "w"], "umbrella": ["umbrella", null, "па-ра-соль-ка", "зонт", "um-brel-la", "п", "з", "u"], "house": ["house", null, "бу-ди-нок", "дом", "house", "б", "д", "h"], "rabbit": ["rabbit", null, "кро-лик", "кро-лик", "rab-bit", "к", "к", "r"], "koala": ["koala", null, "ко-а-ла", "ко-а-ла", "ko-a-la", "к", "к", "k"], "butterfly": ["butterfly", null, "ме-те-лик", "ба-боч-ка", "but-ter-fly", "м", "б", "b"], "horse": ["horse", null, "кінь", "ло-шадь", "horse", "кі", "ль", "h"], "puzzle": ["puzzle", null, "пазл", "пазл", "puz-zle", "п", "п", "p"], "hat": [null, null, "шап-ка", "шап-ка", "hat", "ш", "ш", "h"], "pinecone": [null, null, "шиш-ка", "шиш-ка", "pine-cone", "ш", "ш", "p"]};
-const SQW={"uk": {"м": "мак", "с": "сир", "к": "кубик", "л": "лапа", "ш": "шуба", "а": "акула", "п": "пиріг"}, "ru": {"м": "мак", "с": "сыр", "к": "кубик", "ль": "лес", "ш": "шуба", "а": "аист", "п": "панда"}, "en": {"m": "milk", "s": "seal", "k": "kite", "b": "bed", "f": "fan", "p": "pot", "h": "hen"}};
+/* uk і ru: модельні слова й набір звуків узгоджено з тестом «Готовність до школи» — жодне слово не збігається з його завданнями */
+const SQW={"uk": {"м": "мило", "с": "сік", "к": "каша", "л": "лапа", "ш": "шия", "а": "аптека", "п": "пиріг"}, "ru": {"мь": "метла", "с": "сок", "к": "каша", "ль": "лес", "ш": "шея", "а": "аптека", "п": "панда"}, "en": {"m": "milk", "s": "seal", "k": "kite", "b": "bed", "f": "fan", "p": "pot", "h": "hen"}};
 SQW.pl={m:'mak',s:'ser',k:'kura',p:'pająk',a:'agrest',b:'but',l:'lampa'};
 function objName(o,l){l=l||LANG;if(l==='pl')return (OBJ_PL[o]||[])[0]||OBJ[o][4];return OBJ[o][2+['uk','ru','en'].indexOf(l)];}
 function objFirst(o){if(LANG==='pl')return (OBJ_PL[o]||[])[1]||'';return OBJ[o][5+['uk','ru','en'].indexOf(LANG)];}
@@ -659,7 +660,7 @@ function PICO(o){const r=OBJ[o];
   if(r[0]==='OWL')return `<img src="${OWL}" alt="" style="border-radius:50%"/>`;
   if(r[0]&&IMG[r[0]])return img(r[0]);
   return `<span class="emo">${r[1]}</span>`;}
-const OBJS=()=>Object.keys(OBJ).filter(o=>objAvail(o)&&!(LANG==='uk'&&o==='bus'));
+const OBJS=()=>Object.keys(OBJ).filter(o=>objAvail(o)&&!(LANG==='uk'&&o==='bus')&&o!=='apricot');   /* абрикос — лише в іграх на звуки й склади (схожий на персик) */
 function xpic(k,emoji){return XIMG[k]?`<img src="${XIMG[k]}" alt=""/>`:`<span class="emo">${emoji}</span>`;}
 
 function gameCard(k){const g=GT(k);return `<button class="mrow" onclick="launch('${k}')"><span class="em">${META[k].ic}</span>
@@ -1161,19 +1162,19 @@ GAME.path=function(){
 GAME.sound=function(){
   const rounds=6;let r=0,correct=0;
   const base=s=>s[0];
-  const groups={};OBJS().forEach(o=>{const f=objFirst(o);if(SQW[LANG][f])(groups[f]=groups[f]||[]).push(o);});
+  const groups={};PHON_OBJS().forEach(o=>{const f=objFirst(o);if(SQW[LANG][f])(groups[f]=groups[f]||[]).push(o);});
   const gkeys=Object.keys(groups);const order=[];while(order.length<rounds)order.push(...shuffle(gkeys));
   const used=new Set();
   const go=()=>{if(curGame!=='sound')return;if(r>=rounds)return win(L().of(correct,rounds),correct/rounds);
     const g=order[r];const cand=groups[g].filter(o=>!used.has(o));const ans=(cand.length?cand:groups[g])[ri(0,(cand.length?cand:groups[g]).length-1)];used.add(ans);
-    const nd=LV<=5?2:3;const dis=shuffle(OBJS().filter(o=>base(objFirst(o))!==base(g))).slice(0,nd);
+    const nd=LV<=5?2:3;const dis=shuffle(PHON_OBJS().filter(o=>base(objFirst(o))!==base(g))).slice(0,nd);
     const opts=shuffle([ans,...dis]);
     app.innerHTML=topbar('sound')+`<div class="screen"><h2>${GT('sound')[1]}</h2>
       <p class="big">${L().sound_p} <b>«${SQW[LANG][g]}»</b>?</p>
       <button class="btn sec" id="rep" style="padding:8px 16px">🔊 «${SQW[LANG][g]}»</button>
       ${divider(L().chooseBelow)}<div class="tiles ${opts.length>3?'t4':''}" id="s"></div></div>`;
-    sayQueue(['sound_q','sq_'+g],.35);
-    document.getElementById('rep').onclick=()=>sayQueue(['sq_'+g]);
+    sayQueue(['sound_q',SQK(g)],.35);
+    document.getElementById('rep').onclick=()=>sayQueue([SQK(g)]);
     const s=document.getElementById('s');
     opts.forEach(o=>{const d=document.createElement('div');d.className='tile wsnd'+(opts.length>3?'':' big');d.innerHTML=PICO(o)+`<span class="spk" title="🔊">🔊</span>`;
       d.querySelector('.spk').onclick=e=>{e.stopPropagation();sayQueue(['nm_'+o]);};
@@ -1186,7 +1187,7 @@ GAME.sound=function(){
 GAME.syll=function(){
   const rounds=6;let r=0,correct=0;
   const syl=o=>objName(o).split('-').length;const maxS=LV<=4?2:LV<=6?3:4;
-  const pool=OBJS().filter(o=>syl(o)<=maxS);
+  const pool=PHON_OBJS().filter(o=>syl(o)<=maxS);
   const byN={};pool.forEach(o=>(byN[syl(o)]=byN[syl(o)]||[]).push(o));
   const pickList=[];const ns=Object.keys(byN).map(Number);
   while(pickList.length<rounds){const n=ns[pickList.length%ns.length];const c=byN[n].filter(o=>!pickList.includes(o));pickList.push((c.length?c:byN[n])[ri(0,(c.length?c:byN[n]).length-1)]);}
@@ -1269,6 +1270,33 @@ const NIMG='img/bank/';
 if(!OBJ.hat)OBJ.hat=[null,'🧢','шап-ка','шап-ка','hat','ш','ш','h'];
 if(!OBJ.pinecone)OBJ.pinecone=[null,'🌰','шиш-ка','шиш-ка','pine-cone','ш','ш','p'];
 try{if(!OBJ_PL.hat)OBJ_PL.hat=['czap-ka','cz'];if(!OBJ_PL.pinecone)OBJ_PL.pinecone=['szysz-ka','sz'];}catch(e){}
+/* ===== Узгодження з тестом «Готовність до школи» (жовтень 2026) =====
+   Ігри «Звуки-близнюки» і «Плескаємо склади» не використовують слів із фонологічних завдань тесту
+   («Перший звук», «Знайди риму», «Скільки складів»), щоб гра не тренувала тестові завдання. */
+const GOT_WORDS={"uk": ["автобус", "акула", "ананас", "апельсин", "банан", "барабан", "бочка", "бублик", "булка", "вагон", "виделка", "вишня", "вовк", "ворона", "вухо", "відро", "вікно", "віник", "гарбуз", "гном", "гніздо", "годинник", "гриб", "груша", "гуска", "двері", "дерево", "диван", "диня", "дракон", "дуб", "дім", "жаба", "жолудь", "жук", "заєць", "зебра", "зошит", "зуб", "зірка", "кавун", "капуста", "картина", "качка", "ключ", "книжка", "коза", "корова", "корона", "коса", "кошик", "кріт", "кубик", "кінь", "кіт", "лавка", "лампа", "лев", "лижі", "лимон", "лисиця", "ложка", "лопата", "ліжко", "ліс", "літак", "м'яч", "майка", "мак", "малина", "мама", "машина", "метелик", "миша", "мишка", "молоко", "морква", "місяць", "ніж", "ніс", "око", "олівець", "оса", "павук", "пальто", "папуга", "парасолька", "перо", "планшет", "полуниця", "помідор", "прапор", "пташка", "рак", "ракета", "риба", "ромашка", "рука", "рукавиця", "сир", "слон", "собака", "сова", "сом", "сонце", "сорочка", "спідниця", "стіл", "стілець", "сумка", "тарілка", "телевізор", "телефон", "тигр", "трава", "тюльпан", "хмара", "холодильник", "чайка", "чайник", "чашка", "черепаха", "човен", "шапка", "шафа", "шишка", "шуба", "яблуко", "їжак"], "ru": ["автобус", "авторкою", "акула", "ананас", "апельсин", "банан", "барабан", "бочка", "бублик", "будка", "булочка", "вагон", "ведро", "веник", "версії", "вилка", "вишня", "волк", "ворона", "гнездо", "гном", "гриб", "груша", "гусь", "дверь", "диван", "дом", "дракон", "дуб", "дыня", "жук", "жёлудь", "заяц", "звезда", "зонт", "зуб", "капуста", "карандаш", "картина", "ключ", "книга", "книжка", "коза", "конфета", "конь", "корзина", "корова", "корона", "коса", "кот", "кошка", "краски", "крот", "кубик", "кукуруза", "лампа", "лев", "лимон", "лиса", "лодка", "ложка", "лопата", "луна", "лыжи", "лягушка", "майка", "мак", "малина", "мама", "машина", "молоко", "морковь", "мышка", "мяч", "нож", "нос", "облако", "окно", "пальто", "перевірки", "перо", "планшет", "попугай", "потребує", "проєкт", "рак", "ракета", "ромашка", "російської", "рука", "рыба", "самолёт", "слон", "собака", "сова", "солнце", "сом", "сумка", "сыр", "тарелка", "телевизор", "телефон", "трава", "тыква", "тюльпан", "утка", "ухо", "холодильник", "чайка", "чайник", "часы", "чашка", "черепаха", "шапка", "шишка", "шкаф", "шуба", "яблоко", "ёж"]};
+const PHON_OBJS=()=>Object.keys(OBJ).filter(o=>objAvail(o)&&!(LANG==='uk'&&o==='bus')&&o!=='peach').filter(o=>!(GOT_WORDS[LANG]||[]).includes(String(objName(o)).replace(/-/g,'').replace(/’/g,"'").toLowerCase()));
+const SQK=g=>(LANG==='uk'||LANG==='ru'?'sqm_':'sq_')+g;
+/* нові предмети: [картинка, емодзі, uk, ru, en, перший звук uk, ru, en] + польська назва */
+const NEW_OBJ={
+ sled:[null,'🛷','сан-ки','сан-ки','sled','с','с','s',['san-ki','s']],
+ snowman:[null,'⛄','сні-го-вик','сне-го-вик','snow-man','с','сь','s',['bał-wan','b']],
+ bone:[null,'🦴','кіст-ка','кость','bone','к','к','b',['kość','k']],
+ squirrel:[null,'🐿️','біл-ка','бел-ка','squir-rel','б','бь','s',['wie-wiór-ka','w']],
+ monkey:[null,null,'мав-па','о-безь-я-на','mon-key','м','о','m',['mał-pa','m']],
+ stork:[null,null,'ле-ле-ка','а-ист','stork','л','а','s',['bo-cian','b']],
+ leaf:[null,null,'лис-ток','лист','leaf','л','ль','l',['liść','l']],
+ flashlight:[null,null,'ліх-та-рик','фо-на-рик','flash-light','л','ф','f',['la-tar-ka','l']],
+ apricot:[null,null,'аб-ри-кос','аб-ри-кос','a-pri-cot','а','а','a',['mo-re-la','m']],
+ aquarium:[null,null,'ак-ва-рі-ум','ак-ва-ри-ум','a-qua-ri-um','а','а','a',['ak-wa-ri-um','a']],
+ aster:[null,null,'айс-тра','ас-тра','as-ter','а','а','a',['as-ter','a']],
+ scarf:[null,null,'шарф','шарф','scarf','ш','ш','s',['sza-lik','sz']],
+ chocolate:[null,null,'шо-ко-лад','шо-ко-лад','choc-o-late','ш','ш','ch',['cze-ko-la-da','cz']],
+ penguin:[null,null,'пінг-він','пин-гвин','pen-guin','п','п','p',['pin-gwin','p']]};
+Object.entries(NEW_OBJ).forEach(([k,r])=>{if(OBJ[k])return;OBJ[k]=r.slice(0,8);try{OBJ_PL[k]=r[8];}catch(e){}});
+Object.assign(VOICE_TXT,{"nm_sled": ["санки", "санки", "sled", "sanki"], "nm_snowman": ["сніговик", "снеговик", "snowman", "bałwan"], "nm_bone": ["кістка", "кость", "bone", "kość"], "nm_squirrel": ["білка", "белка", "squirrel", "wiewiórka"], "nm_monkey": ["мавпа", "обезьяна", "monkey", "małpa"], "nm_stork": ["лелека", "аист", "stork", "bocian"], "nm_leaf": ["листок", "лист", "leaf", "liść"], "nm_flashlight": ["ліхтарик", "фонарик", "flashlight", "latarka"], "nm_apricot": ["абрикос", "абрикос", "apricot", "morela"], "nm_aquarium": ["акваріум", "аквариум", "aquarium", "akwarium"], "nm_aster": ["айстра", "астра", "aster", "aster"], "nm_scarf": ["шарф", "шарф", "scarf", "szalik"], "nm_chocolate": ["шоколад", "шоколад", "chocolate", "czekolada"], "nm_penguin": ["пінгвін", "пингвин", "penguin", "pingwin"], "sqm_м": ["мило", "", "", ""], "sqm_с": ["сік", "сок", "", ""], "sqm_к": ["каша", "каша", "", ""], "sqm_л": ["лапа", "", "", ""], "sqm_ш": ["шия", "шея", "", ""], "sqm_а": ["аптека", "аптека", "", ""], "sqm_п": ["пиріг", "панда", "", ""], "sqm_мь": ["", "метла", "", ""], "sqm_ль": ["", "лес", "", ""]});
+/* картинки нових предметів (img/bank/<ключ>.webp) вмикаються лише тоді, коли файл справді є на сайті */
+['monkey','stork','leaf','flashlight','apricot','aquarium','aster','scarf','chocolate','penguin'].forEach(k=>{
+  try{const im=new Image();im.onload=()=>{XIMG[k]=NIMG+k+'.webp';};im.src=NIMG+k+'.webp';}catch(e){}});
 function SP(k,st){const s=XIMG[k]||IMG[k];return s?`<img src="${s}" alt="" draggable="false" style="${st||''}"/>`:'';}
 const hasPic=k=>!!(XIMG[k]||IMG[k]);
 function TX(o){return o[LANG]||o.uk;}
