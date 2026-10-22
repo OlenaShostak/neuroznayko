@@ -9,6 +9,8 @@
 Запуск:
     python azure_tts_gotovnist.py check uk            — ПЕРЕВІРКА НАГОЛОСІВ: усі окремі слова з номерами в кількох MP3
                                                         (audio/_check/uk_1.mp3 …) і список audio/_check/uk.txt
+    python azure_tts_gotovnist.py variants uk         — варіанти вимови проблемних слів із variants_uk.json одним файлом,
+                                                        з номерами (audio/_check/variants_uk.mp3 і variants_uk.txt)
     python azure_tts_gotovnist.py --words --lang uk   — озвучити лише окремі слова (назви картинок)
     python azure_tts_gotovnist.py                     — озвучити все, чого ще немає (обидві мови)
     python azure_tts_gotovnist.py --lang ru           — лише одна мова
@@ -48,6 +50,55 @@ def check(man, lang, per_file=40):
     print("\nСписок із номерами: " + os.path.join(out, lang + ".txt"))
     print("Послухайте файли й надішліть номери слів, де наголос або вимова неправильні.")
 
+def variants(lang):
+    """Кожне проблемне слово в кількох написаннях — одним файлом із номерами. Обираєте номери, що звучать правильно."""
+    vp = os.path.join(HERE, "variants_%s.json" % lang)
+    if not os.path.exists(vp):
+        raise SystemExit("Не знайдено " + vp)
+    V = json.load(open(vp, encoding="utf-8"))
+    A.PRON = A.load_pron()
+    key, region = A.ask_credentials()
+    voice = A.VOICES[lang]
+    esc = lambda x: x.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    out = os.path.join(HERE, "audio", "_check"); os.makedirs(out, exist_ok=True)
+    parts, lines, n = [], [], 0
+    for word, entry in V.items():
+        ctx, cands = ("{w}", entry) if isinstance(entry, list) else (entry.get("context", "{w}"), entry["cands"])
+        for c in cands:
+            n += 1
+            shown = c if not c.startswith("<") else "(транскрипція IPA)"
+            lines.append("%d. %s  →  %s" % (n, word, ctx.replace("{w}", shown)))
+            piece = c if c.startswith("<") else esc(c)
+            sent = esc(A.clean(ctx.replace("{w}", "\uE000"))).replace("\uE000", piece)
+            parts.append("%d. <break time='250ms'/>%s<break time='900ms'/>" % (n, sent))
+    rate = A.RATE[lang] if isinstance(A.RATE, dict) else A.RATE
+    inner = '<prosody rate="%s" pitch="%s">%s</prosody>' % (rate, A.PITCH, " ".join(parts))
+    if "Multilingual" in voice:
+        inner = '<lang xml:lang="%s">%s</lang>' % (A.LOCALES[lang], inner)
+    body = '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="%s"><voice name="%s">%s</voice></speak>' % (A.LOCALES[lang], voice, inner)
+    def wrap(x):
+        x = '<prosody rate="%s" pitch="%s">%s</prosody>' % (rate, A.PITCH, x)
+        if "Multilingual" in voice:
+            x = '<lang xml:lang="%s">%s</lang>' % (A.LOCALES[lang], x)
+        return '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="%s"><voice name="%s">%s</voice></speak>' % (A.LOCALES[lang], voice, x)
+    try:
+        data = A.synth(key, region, lang, "", voice, raw_body=body)
+    except RuntimeError:
+        # Azure не прийняв увесь набір (зазвичай через транскрипцію IPA) — озвучуємо варіанти по одному, неприйняті позначаємо
+        print("Azure не прийняв увесь набір разом — озвучую варіанти по одному…")
+        data = b""
+        for i, part in enumerate(parts):
+            try:
+                data += A.synth(key, region, lang, "", voice, raw_body=wrap(part))
+            except RuntimeError:
+                lines[i] += "   ✗ Azure не прийняв цей варіант (пропущено)"
+                data += A.synth(key, region, lang, "", voice, raw_body=wrap("%d. <break time='250ms'/>—<break time='600ms'/>" % (i + 1)))
+            time.sleep(1)
+    open(os.path.join(out, "variants_%s.txt" % lang), "w", encoding="utf-8").write("\n".join(lines) + "\n")
+    A.save(os.path.join(out, "variants_%s.mp3" % lang), data)
+    print("\n".join(lines))
+    print("\n✓ audio/_check/variants_%s.mp3 — послухайте й надішліть номери, що звучать правильно." % lang)
+
 def main():
     args = sys.argv[1:]
     mp = os.path.join(HERE, "voice_manifest_gotovnist.json")
@@ -60,6 +111,8 @@ def main():
             print(k, " ", t)
         print("\nУсього фраз: %d" % len(man[lang]))
         return
+    if args and args[0] == "variants":
+        return variants(args[1] if len(args) > 1 else "uk")
     if args and args[0] == "check":
         return check(man, args[1] if len(args) > 1 else "uk")
     refresh = bool(args) and args[0] == "refresh"
